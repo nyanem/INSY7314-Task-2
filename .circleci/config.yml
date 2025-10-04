@@ -14,3 +14,9 @@ jobs:
       - run:
           name: Verify backend code
           command: cd backend && echo "Backend dependencies installed, code verified successfully!"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - backend_build
