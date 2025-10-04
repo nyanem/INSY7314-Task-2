@@ -13,14 +13,14 @@ jobs:
   
   # Frontend job
   frontend_build:
-  docker:
-    - image: cimg/node:20.5
-  working_directory: ~/repo
-  steps:
-    - checkout
-    - run: cd frontend && npm install
-    - run: chmod +x ./frontend/node_modules/.bin/react-scripts
-    - run: cd frontend && npm run build
+    docker:
+      - image: cimg/node:20.5 # Node.js Docker image
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: cd frontend && npm install
+      - run: chmod +x ./frontend/node_modules/.bin/react-scripts || true
+      - run: cd frontend && npm run build
 
 workflows:
   version: 2
