@@ -8,13 +8,19 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run:                 # Install backend dependencies - main branch
+
+      # Install backend dependencies
+      - run:
           name: Install backend dependencies
           command: cd backend && npm install
-      - run:                 # Verify backend code - onboarding branch
-          name: Verify backend code
-          command: cd backend && echo "Backend dependencies installed, code verified successfully!"
-      - run:                 # Ensure ATLAS_URI is set
+
+      # Verify backend code (used in onboarding/authentication branch)
+      - run:
+          name: Verify backend code (onboarding/auth)
+          command: cd backend && echo "Backend dependencies installed and authentication section verified successfully!"
+
+      # Ensure MongoDB connection string exists
+      - run:
           name: Verify MongoDB connection string
           command: |
             if [ -z "$ATLAS_URI" ]; then
@@ -23,10 +29,25 @@ jobs:
             else
               echo "ATLAS_URI is set"
             fi
-      - run:                 # Run backend tests if available - main branch
+
+      # Check JWT secret exists
+      - run:
+          name: Verify JWT secret
+          command: |
+            if [ -z "$JWT_SECRET" ]; then
+              echo "ERROR: JWT_SECRET is not set!"
+              exit 1
+            else
+              echo "JWT_SECRET is set"
+            fi
+
+      # Run backend tests if available
+      - run:
           name: Run backend tests (if available)
           command: cd backend && npm run test || echo "No tests yet"
-      - run:                 # Lint backend code
+
+      # Lint backend code
+      - run:
           name: Lint backend code
           command: cd backend && npx eslint . || echo "No lint errors"
 

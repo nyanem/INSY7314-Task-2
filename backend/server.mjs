@@ -14,6 +14,9 @@ import authRoutes from './routes/authRoutes.mjs';
 // Import security middleware
 import { enforceHTTPS, securityHeaders } from './middleware/secure.mjs';
 
+// Import authentication middleware - this will be used once the dashboard and other pages are set up
+import { authMiddleware } from './middleware/secure.mjs';
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -46,7 +49,7 @@ app.use(securityHeaders);
 // Onboarding routes
 app.use('/api/onboarding', onboardingRoutes);
 
-// Auth routes
+// Auth routes - register and login
 app.use('/api/auth', authRoutes);
 
 // Basic frontend demo routes
@@ -54,11 +57,21 @@ app.get('/', (req, res) => {
   res.send(`
     <h1>Welcome to International Banking System</h1>
     <a href="/register"><button>Get Started</button></a>
+    <a href="/register"><button>Get Started</button></a>
+    <a href="/login"><button>Login</button></a>
   `);
+});
+
+app.get('/start', (req, res) => {
+  res.send('<h1>Get Started Page</h1>');
 });
 
 app.get('/register', (req, res) => {
   res.send('<h1>Register Page</h1>');
+});
+
+app.get('/login', (req, res) => {
+  res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>');
 });
 
 // NB: make sure your .env has ATLAS_URI for the connection string - you'll have to create your own .env file and also add the port number in there, mine is PORT=5000
