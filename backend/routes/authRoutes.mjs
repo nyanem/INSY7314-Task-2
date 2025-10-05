@@ -3,7 +3,7 @@
 // Imports necessary for the Auth Route Setup
 import express from 'express';
 import { body } from 'express-validator';
-import { register } from '../controllers/authController.mjs';
+import { register, login } from '../controllers/authController.mjs';
 
 // Create router
 const router = express.Router();
@@ -11,7 +11,7 @@ const router = express.Router();
 // A strong password is ensured by password regex - must be at least 12 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/;
 
-// Registration route with validation
+// Register route
 router.post(
   '/register', 
   [
@@ -24,6 +24,18 @@ router.post(
   ], 
   register
 );
+
+// Login route using username
+router.post(
+  '/login',
+  [
+    body('userName').notEmpty().trim().escape(),         // full name
+    body('accountNumber').isNumeric().isLength({ min: 6 }).trim(),
+    body('password').notEmpty()
+  ],
+  login
+);
+
 
 // Export the router
 export default router;
