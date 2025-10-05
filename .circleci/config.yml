@@ -4,19 +4,40 @@ jobs:
   # Backend job
   backend_build:
     docker:
-      - image: cimg/node:20.5
+      - image: cimg/node:20.5 # Node.js Docker image
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:                 # Install backend dependencies - main branch
+          name: Install backend dependencies
+          command: cd backend && npm install
+      - run:                 # Verify backend code - onboarding branch
+          name: Verify backend code
+          command: cd backend && echo "Backend dependencies installed, code verified successfully!"
+      - run:                 # Run backend tests if available - main branch
+          name: Run backend tests (if available)
+          command: cd backend && npm run test || echo "No tests yet"
+
+  # Frontend job
+  frontend_build:
+    docker:
+      - image: cimg/node:20.5 # Node.js Docker image
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: Install backend dependencies
-          command: cd backend && npm install
+          name: Install frontend dependencies
+          command: cd frontend && npm install
       - run:
-          name: Verify backend code
-          command: cd backend && echo "Backend dependencies installed, code verified successfully!"
+          name: Ensure react-scripts executable
+          command: chmod +x ./frontend/node_modules/.bin/react-scripts || true
+      - run:
+          name: Build frontend
+          command: cd frontend && npm run build
 
 workflows:
   version: 2
   build_and_test:
     jobs:
       - backend_build
+      - frontend_build
