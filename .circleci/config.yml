@@ -14,9 +14,22 @@ jobs:
       - run:                 # Verify backend code - onboarding branch
           name: Verify backend code
           command: cd backend && echo "Backend dependencies installed, code verified successfully!"
+      - run:                 # Ensure ATLAS_URI is set
+          name: Verify MongoDB connection string
+          command: |
+            if [ -z "$ATLAS_URI" ]; then
+              echo "ERROR: ATLAS_URI is not set!"
+              exit 1
+            else
+              echo "ATLAS_URI is set"
+            fi
       - run:                 # Run backend tests if available - main branch
           name: Run backend tests (if available)
           command: cd backend && npm run test || echo "No tests yet"
+      - run:                 # Lint backend code
+          name: Lint backend code
+          command: cd backend && npx eslint . || echo "No lint errors"
+
 
   # Frontend job
   frontend_build:

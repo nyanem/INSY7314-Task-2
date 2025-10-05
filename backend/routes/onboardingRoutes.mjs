@@ -2,7 +2,7 @@
 
 // adding the necessary imports - express and the controller functions
 import express from "express";
-import { getStarted, showFeatures, showContact } from "../controllers/onboardingController.js";
+import { getStarted, showFeatures, showContact } from "../controllers/onboardingController.mjs";
 
 // create a router instance
 const router = express.Router();

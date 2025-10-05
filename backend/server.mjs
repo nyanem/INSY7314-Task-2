@@ -6,7 +6,13 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import onboardingRoutes from './routes/onboardingRoutes.js';
+
+// Import Routes
+import onboardingRoutes from './routes/onboardingRoutes.mjs';
+import authRoutes from './routes/authRoutes.mjs';
+
+// Import security middleware
+import { enforceHTTPS, securityHeaders } from './middleware/secure.mjs';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -14,27 +20,34 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
-// Middleware - allows requests from frontend - React app
-app.use(cors());
+// Enable CORS only from your frontend origin
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN || '*',
+  methods: ['GET','POST','PUT','DELETE'],
+  credentials: true
+}));
+
+// Parse incoming JSON
 app.use(express.json());
 
 // Helmet security headers configuration
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-      },
-    },
-    frameguard: { action: 'deny' }, // this is an X-Frame-Options
-    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    contentSecurityPolicy: false, // custom CSP will be set in the security headers middleware
+    frameguard: { action: 'deny' }, // x-frame-options
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // HSTS
   })
 );
 
+// Enforce HTTPS redirect and security headers - CSP, X-Frame, HSTS
+app.use(enforceHTTPS);
+app.use(securityHeaders);
+
 // Onboarding routes
 app.use('/api/onboarding', onboardingRoutes);
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // Basic frontend demo routes
 app.get('/', (req, res) => {
@@ -52,8 +65,8 @@ app.get('/register', (req, res) => {
 
 // MongoDB connection
 mongoose.connect(process.env.ATLAS_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection failed', err));
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection failed', err));
 
   // NB: make sure you generate your own keys and place them in the keys folder, this is ignored by git for security reasons - certificate.pem and privatekey.pem
 
