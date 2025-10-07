@@ -13,15 +13,55 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/;
 
 // Register route
 router.post(
-  '/register', 
+  '/register',
   [
-    body('firstName').notEmpty().trim().escape(),
-    body('middleName').optional().trim().escape(),
-    body('lastName').notEmpty().trim().escape(),
-    body('idNumber').isAlphanumeric().isLength({ min: 6 }).trim(),
-    body('accountNumber').isNumeric().isLength({ min: 6 }).trim(),
-    body('password').matches(passwordRegex)
-  ], 
+    body('firstName')
+      .trim()
+      .escape()
+      .isLength({ min: 1, max: 60 })
+      .withMessage('First name must be 1–60 characters long.')
+      .matches(/^[A-Za-z'\- ]+$/)
+      .withMessage('First name may contain only letters, spaces, apostrophes, or hyphens.'),
+
+    body('middleName')
+      .optional({ checkFalsy: true })
+      .trim()
+      .escape()
+      .isLength({ max: 60 })
+      .withMessage('Middle name must be less than 60 characters.')
+      .matches(/^[A-Za-z'\- ]*$/)
+      .withMessage('Middle name may contain only letters, spaces, apostrophes, or hyphens.'),
+
+    body('lastName')
+      .trim()
+      .escape()
+      .isLength({ min: 1, max: 60 })
+      .withMessage('Last name must be 1–60 characters long.')
+      .matches(/^[A-Za-z'\- ]+$/)
+      .withMessage('Last name may contain only letters, spaces, apostrophes, or hyphens.'),
+
+    body('accountNumber')
+      .notEmpty()
+      .trim()
+      .escape()
+      .isLength({ min: 6, max: 20 })
+      .matches(/^[A-Za-z0-9\-]+$/)
+      .withMessage('Account number may contain only letters, numbers, or hyphens.'),
+
+    body('accountNumber')
+      .notEmpty()
+      .trim()
+      .escape()
+      .isLength({ min: 6, max: 20 })
+      .matches(/^[A-Za-z0-9\-]+$/)
+      .withMessage('Account number may contain only letters, numbers, or hyphens.'),
+
+    body('password')
+      .matches(passwordRegex)
+      .withMessage(
+        'Password must be at least 12 characters long and include uppercase, lowercase, number, and special character.'
+      ),
+  ],
   register
 );
 
@@ -29,13 +69,28 @@ router.post(
 router.post(
   '/login',
   [
-    body('userName').notEmpty().trim().escape(),         // full name
-    body('accountNumber').isNumeric().isLength({ min: 6 }).trim(),
-    body('password').notEmpty()
+    body('userName')
+      .notEmpty()
+      .trim()
+      .escape()
+      .matches(/^[A-Za-z'\- ]+ [A-Za-z'\- ]+$/)
+      .withMessage('Provide both first and last name, letters, spaces, apostrophes, or hyphens only.'),
+
+    body('accountNumber')
+      .notEmpty()
+      .trim()
+      .escape()
+      .isLength({ min: 6, max: 20 })
+      .matches(/^[A-Za-z0-9\-]+$/)
+      .withMessage('Account number may contain only letters, numbers, or hyphens.'),
+
+    body('password')
+      .notEmpty()
+      .matches(passwordRegex)
+      .withMessage('Invalid password format.')
   ],
   login
 );
-
 
 // Export the router
 export default router;

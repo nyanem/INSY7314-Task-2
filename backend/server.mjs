@@ -6,6 +6,11 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp'; 
+import cookieParser from 'cookie-parser'; 
 
 // Import Routes
 import onboardingRoutes from './routes/onboardingRoutes.mjs';
@@ -31,7 +36,18 @@ app.use(cors({
 }));
 
 // Parse incoming JSON
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
+
+app.use(cookieParser());
+
+app.use(hpp());
+
+app.use(mongoSanitize({
+  replaceWith: '_'
+}));
+
+
+app.use(xss());
 
 // Helmet security headers configuration
 app.use(
@@ -39,6 +55,16 @@ app.use(
     contentSecurityPolicy: false, // custom CSP will be set in the security headers middleware
     frameguard: { action: 'deny' }, // x-frame-options
     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // HSTS
+  })
+);
+
+// Rate limit to prevent brute-force & DDoS
+app.use(
+  '/api/auth/',
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // adjust as needed
+    message: { message: 'Too many requests, please try again later.' },
   })
 );
 
