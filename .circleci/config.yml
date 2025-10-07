@@ -51,6 +51,44 @@ jobs:
           name: Lint backend code
           command: cd backend && npx eslint . || echo "No lint errors"
 
+      # Run security tests for authentication endpoints
+      - run:
+          name: Verify Authentication Endpoints (Register & Login)
+          command: |
+            echo "Testing Register & Login endpoints with hardened input..."
+            
+            # Register a new test customer (should succeed)
+            curl -s -o /dev/null -w "%{http_code}" -X POST https://localhost:5000/api/auth/register \
+              -H "Content-Type: application/json" \
+              -d '{
+                "firstName": "Test",
+                "middleName": "X",
+                "lastName": "User",
+                "idNumber": "900001",
+                "accountNumber": "ACC-900001",
+                "password": "Str0ng!Password#2025"
+              }' | grep -q "201" || (echo "Register endpoint failed!" && exit 1)
+
+            # Attempt login with correct credentials (should succeed)
+            curl -s -o /dev/null -w "%{http_code}" -X POST https://localhost:5000/api/auth/login \
+              -H "Content-Type: application/json" \
+              -d '{
+                "userName": "Test User",
+                "accountNumber": "ACC-900001",
+                "password": "Str0ng!Password#2025"
+              }' | grep -q "200" || (echo "Login endpoint failed!" && exit 1)
+
+            # Attempt login with invalid password (should fail)
+            curl -s -o /dev/null -w "%{http_code}" -X POST https://localhost:5000/api/auth/login \
+              -H "Content-Type: application/json" \
+              -d '{
+                "userName": "Test User",
+                "accountNumber": "ACC-900001",
+                "password": "WrongPassword123!"
+              }' | grep -q "401" || (echo "Login endpoint did not reject invalid password!" && exit 1)
+
+            echo "Authentication endpoints passed security tests."
+
 
   # Frontend job
   frontend_build:
