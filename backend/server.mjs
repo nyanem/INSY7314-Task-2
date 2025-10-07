@@ -1,8 +1,7 @@
-// server.mjs
+// Import Necessary for the Server Setup
 import express from 'express';
 import https from 'https';
 import fs from 'fs';
-import http from 'http';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,8 +9,8 @@ import dotenv from 'dotenv';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
-import hpp from 'hpp';
-import cookieParser from 'cookie-parser';
+import hpp from 'hpp'; 
+import cookieParser from 'cookie-parser'; 
 
 // Import Routes
 import onboardingRoutes from './routes/onboardingRoutes.mjs';
@@ -20,99 +19,106 @@ import authRoutes from './routes/authRoutes.mjs';
 // Import security middleware
 import { enforceHTTPS, securityHeaders } from './middleware/secure.mjs';
 
-// Load env
+// Import authentication middleware - this will be used once the dashboard and other pages are set up
+import { authMiddleware } from './middleware/secure.mjs';
+
+// Load environment variables from .env file
 dotenv.config();
 
-// Create app
+// Initialize Express app
 const app = express();
 
-// Basic middleware
+// Enable CORS only from your frontend origin
 app.use(cors({
   origin: process.env.FRONTEND_ORIGIN || '*',
   methods: ['GET','POST','PUT','DELETE'],
   credentials: true
 }));
 
+// Parse incoming JSON
 app.use(express.json({ limit: '10kb' }));
+
 app.use(cookieParser());
+
 app.use(hpp());
 
-// Note: replaceWith prevents express-mongo-sanitize trying to mutate getters in some envs
-app.use(mongoSanitize({ replaceWith: '_' }));
-app.use(xss());
-
-app.use(helmet({
-  contentSecurityPolicy: false,
-  frameguard: { action: 'deny' },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+app.use(mongoSanitize({
+  replaceWith: '_'
 }));
 
-// Rate limiter for auth routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 50,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: 'Too many requests, please try again later.' }
-});
-app.use('/api/auth', authLimiter);
 
-// Only enforce HTTPS redirects in non-test environments
-if (process.env.NODE_ENV !== 'test') {
-  app.use(enforceHTTPS);
-}
+app.use(xss());
 
-// Custom security headers (CSP, etc.)
+// Helmet security headers configuration
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // custom CSP will be set in the security headers middleware
+    frameguard: { action: 'deny' }, // x-frame-options
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // HSTS
+  })
+);
+
+// Rate limit to prevent brute-force & DDoS
+app.use(
+  '/api/auth/',
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // adjust as needed
+    message: { message: 'Too many requests, please try again later.' },
+  })
+);
+
+// Enforce HTTPS redirect and security headers - CSP, X-Frame, HSTS
+app.use(enforceHTTPS);
 app.use(securityHeaders);
 
-// Routes
+// Onboarding routes
 app.use('/api/onboarding', onboardingRoutes);
+
+// Auth routes - register and login
 app.use('/api/auth', authRoutes);
 
-// Demo routes
+// Basic frontend demo routes
 app.get('/', (req, res) => {
   res.send(`
     <h1>Welcome to International Banking System</h1>
     <a href="/register"><button>Get Started</button></a>
+    <a href="/register"><button>Get Started</button></a>
     <a href="/login"><button>Login</button></a>
   `);
 });
-app.get('/start', (req, res) => res.send('<h1>Get Started Page</h1>'));
-app.get('/register', (req, res) => res.send('<h1>Register Page</h1>'));
-app.get('/login', (req, res) => res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>'));
+
+app.get('/start', (req, res) => {
+  res.send('<h1>Get Started Page</h1>');
+});
+
+app.get('/register', (req, res) => {
+  res.send('<h1>Register Page</h1>');
+});
+
+app.get('/login', (req, res) => {
+  res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>');
+});
+
+// NB: make sure your .env has ATLAS_URI for the connection string - you'll have to create your own .env file and also add the port number in there, mine is PORT=5000
 
 // MongoDB connection
-if (!process.env.ATLAS_URI) {
-  console.error('Warning: ATLAS_URI not set in .env');
-}
 mongoose.connect(process.env.ATLAS_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection failed', err));
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection failed', err));
 
-// Start server: HTTP in test (CI), HTTPS otherwise
+  // NB: make sure you generate your own keys and place them in the keys folder, this is ignored by git for security reasons - certificate.pem and privatekey.pem
+
+// HTTPS options
+const httpsOptions = {
+  key: fs.readFileSync('./keys/privatekey.pem'),
+  cert: fs.readFileSync('./keys/certificate.pem'),
+  minVersion: 'TLSv1.3',
+};
+
+// Start HTTPS server
 const PORT = process.env.PORT || 5000;
-
-if (process.env.NODE_ENV === 'test') {
-  // Start simple HTTP server for CI/testing environment
-  http.createServer(app).listen(PORT, () => {
-    console.log(`Test HTTP server running on http://localhost:${PORT}`);
-  });
-} else {
-  // Start HTTPS server (production/dev)
-  try {
-    const httpsOptions = {
-      key: fs.readFileSync('./keys/privatekey.pem'),
-      cert: fs.readFileSync('./keys/certificate.pem'),
-      minVersion: 'TLSv1.3',
-    };
-    https.createServer(httpsOptions, app).listen(PORT, () => {
-      console.log(`Secure server running on https://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error('Failed to start HTTPS server (keys missing?):', err.message);
-    // Fallback to HTTP if you want (NOT recommended for production)
-    // http.createServer(app).listen(PORT, () => console.log(`HTTP server running on http://localhost:${PORT}`));
-  }
-}
-
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`Secure server running on https://localhost:${PORT}`);
+});
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

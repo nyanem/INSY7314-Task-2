@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 export const register = async (req, res) => {
   // Validate input
   try {
-    // 1️⃣ Validate input before DB queries
+    // Validate input before DB queries
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -25,7 +25,7 @@ export const register = async (req, res) => {
     // Destructure request body
     const { firstName, middleName, lastName, idNumber, accountNumber, password } = req.body;
 
-    // 3️⃣ Additional defensive checks (sanity limits)
+    // Additional defensive checks (sanity limits)
     const maxFieldLengthRegister = 200; // prevent buffer overflow attempts
     const fields = { firstName, middleName, lastName, idNumber, accountNumber, password };
     for (const [key, value] of Object.entries(fields)) {
@@ -67,12 +67,16 @@ export const register = async (req, res) => {
 
 // Login handler with JWT token generation
 export const login = async (req, res) => {
+  // Validate input and authenticate user
   try {
+    // Validate input before DB queries
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
+    // Destructure request body
     const { userName, accountNumber, password } = req.body;
 
+    // Additional defensive checks - sanity limits
     const maxFieldLengthLogin = 200;
     for (const [key, value] of Object.entries({ userName, accountNumber, password })) {
       if (typeof value === 'string' && value.length > maxFieldLengthLogin) {
@@ -80,6 +84,7 @@ export const login = async (req, res) => {
       }
     }
 
+    // Split userName into first and last name - assuming space-separated
     const nameParts = userName.trim().split(' ');
     if (nameParts.length < 2) {
       return res.status(400).json({ message: 'Please provide both first and last name in userName' });
@@ -87,6 +92,7 @@ export const login = async (req, res) => {
     const firstName = nameParts[0].toLowerCase();
     const lastName = nameParts.slice(1).join(' ').toLowerCase();
 
+    // Find customer by first name, last name, and account number
     const customer = await Customer.findOne({ firstName, lastName, accountNumber });
     if (!customer || !(await argon2.verify(customer.passwordHash, password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -99,6 +105,7 @@ export const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
+    // Authentication successful
     res.status(200).json({
       message: 'Login successful',
       token,                          // return the JWT token
