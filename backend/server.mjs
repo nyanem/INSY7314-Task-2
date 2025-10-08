@@ -77,9 +77,13 @@ app.get('/login', (req, res) => {
 // NB: make sure your .env has ATLAS_URI for the connection string - you'll have to create your own .env file and also add the port number in there, mine is PORT=5000
 
 // MongoDB connection
-mongoose.connect(process.env.ATLAS_URI)
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection failed', err));
+
+
+const mongoURI = process.env.MONGO_URI;
+
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('MongoDB connection failed', err));
 
   // NB: make sure you generate your own keys and place them in the keys folder, this is ignored by git for security reasons - certificate.pem and privatekey.pem
 
@@ -90,9 +94,12 @@ const httpsOptions = {
   minVersion: 'TLSv1.3',
 };
 
-// Start HTTPS server
+// Start HTTP server for local development
 const PORT = process.env.PORT || 5000;
-https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Secure server running on https://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
+
 //-------------------------------------------------------------------End of File----------------------------------------------------------//
