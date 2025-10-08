@@ -69,5 +69,5 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
-###Circle Ci
+
 [![CircleCI](https://circleci.com/gh/<nyanem>/INS7314-TASK-2.svg?style=svg)](https://circleci.com/gh/<nyanem>/INS7314-TASK-2)
