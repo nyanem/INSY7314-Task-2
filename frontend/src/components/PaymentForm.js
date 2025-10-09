@@ -19,7 +19,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   });
 
   const [savedPayment, setSavedPayment] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [setPreview] = useState(null);
 
   const steps = [
     { id: 1},
