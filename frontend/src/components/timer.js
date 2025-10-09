@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMount = true }) => {
   const [timeRemaining, setTimeRemaining] = useState(timeLimitSeconds);
-  const [setTimedOut] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef(null);
   
   // Store last reset timestamp in localStorage

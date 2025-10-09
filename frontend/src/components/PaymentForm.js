@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Header from "./Navbar";
 import SessionTimeout from "./timer";
+import mastercard from "../assets/mastercard.png";
+import visa from "../assets/visa.png";
 
 const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -19,12 +21,12 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   });
 
   const [savedPayment, setSavedPayment] = useState(null);
-  const [setPreview] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const steps = [
-    { id: 1},
-    { id: 2},
-    { id: 3},
+    { id: 1, label: "Payment Details"},
+    { id: 2, label: "Review"},
+    { id: 3, label: "Confirmation"},
   ];
 
   const goTo = (step) => {
@@ -101,29 +103,64 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
             style={{ marginTop: 16 }}
           >
             <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
-              <div style={{ flex: 1 }}>
+              <div style={styles.leftColumn}>
+
                 <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                  <button
-                    type="button"
+                <label
+                    style={{
+                    ...styles.cardOption,
+                    ...(form.cardType === "visa" ? styles.cardSelectButtonActive : {}),
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    paddingLeft: 12,
+                    }}
                     onClick={() => handleCardSelect("visa")}
+                >
+                    <div style={{ ...styles.radioOuter, ...(form.cardType === "visa" ? styles.radioOuterActive : {}) }}>
+                    <div style={{ ...styles.radioInner, ...(form.cardType === "visa" ? styles.radioInnerActive : {}) }} />
+                    </div>
+
+                    <img src={visa} alt="VISA" style={styles.cardImage} />
+
+                    <input
+                    type="radio"
+                    name="cardType"
+                    value="visa"
+                    checked={form.cardType === "visa"}
+                    onChange={() => handleCardSelect("visa")}
+                    style={{ display: "none" }}
+                    />
+                </label>
+
+                <label
                     style={{
-                      ...styles.cardSelectButton,
-                      ...(form.cardType === "visa" ? styles.cardSelectButtonActive : {}),
+                    ...styles.cardOption,
+                    ...(form.cardType === "mastercard" ? styles.cardSelectButtonActive : {}),
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    paddingLeft: 12,
                     }}
-                  >
-                    VISA
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => handleCardSelect("mastercard")}
-                    style={{
-                      ...styles.cardSelectButton,
-                      ...(form.cardType === "mastercard" ? styles.cardSelectButtonActive : {}),
-                    }}
-                  >
-                    MasterCard
-                  </button>
+                >
+                    <div style={{ ...styles.radioOuter, ...(form.cardType === "mastercard" ? styles.radioOuterActive : {}) }}>
+                    <div style={{ ...styles.radioInner, ...(form.cardType === "mastercard" ? styles.radioInnerActive : {}) }} />
+                    </div>
+
+                    <img src={mastercard} alt="MasterCard" style={styles.cardImage} />
+
+                    <input
+                    type="radio"
+                    name="cardType"
+                    value="mastercard"
+                    checked={form.cardType === "mastercard"}
+                    onChange={() => handleCardSelect("mastercard")}
+                    style={{ display: "none" }}
+                    />
+                </label>
                 </div>
+
 
                 <div style={styles.row}>
                   <label style={{ ...styles.labelField, width: 180 }}>Card Number</label>
@@ -148,7 +185,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                   />
                 </div>
 
-                <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                
                   <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
                     <label style={styles.blockLabel}>Expiry Date</label>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -180,7 +217,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                       style={styles.inputFull}
                     />
                   </div>
-                </div>
+                
               </div>
 
               <div style={{ width: 340 }}>
@@ -438,12 +475,13 @@ const styles = {
   },
   step: {
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
     position: "relative",
   },
   line: {
-    position: "absolute",
+    position: "center",
     left: -24,
     top: "50%",
     width: 24,
@@ -474,76 +512,160 @@ const styles = {
     color: "#301b5b",
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#6b6b7a",
-    marginLeft: 4,
+    marginLeft: 0,
+    marginBottom:6,
+    textAlign: "center",
   },
+
+  /* Card container */
   card: {
     background: "#fff",
-    padding: 20,
+    padding: 36,
     borderRadius: 12,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+    boxShadow: "0 8px 24px rgba(18, 20, 46, 0.06)",
     maxWidth: 980,
-    margin: "0 auto", // Center horizontally
-    width: "100%", // Ensure it takes available width up to maxWidth
+    margin: "0 auto",
+    width: "100%",
   },
+
+  /* Card type buttons (VISA / Mastercard) */
   cardSelectButton: {
-    padding: 8,
-    border: "1px solid #ddd",
+    padding: 12,
+    border: "1px solid #e6e6ee",
     background: "#fff",
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: "pointer",
+    minWidth: 80,
+    minHeight: 56,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
   },
   cardSelectButtonActive: {
-    border: "2px solid #1e1b5b",
+    border: "2px solid #301b5b",
+    boxShadow: "0 6px 18px rgba(48,27,91,0.08)",
   },
+
+  /* rows and labels */
   row: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
     marginBottom: 12,
   },
   labelField: {
     fontWeight: 700,
     color: "#301b5b",
     marginBottom: 0,
+    minWidth: 140,
+    fontSize: 13,
   },
+
+  /* Inputs - muted grey boxes like your screenshot */
   inputFull: {
     width: "100%",
-    padding: 10,
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    background: "#fff",
+    padding: "10px 14px",
+    borderRadius: 8,
+    border: "none",
+    background: "#f3f4f8",
     color: "#301b5b",
+    fontSize: 13,
+    boxSizing: "border-box",
   },
   input: {
     flex: 1,
-    padding: 10,
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    background: "#fff",
+    padding: "10px 14px",
+    borderRadius: 8,
+    border: "none",
+    background: "#f3f4f8",
     color: "#301b5b",
+    fontSize: 13,
+    boxSizing: "border-box",
   },
   smallInput: {
-    padding: 10,
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    background: "#fff",
+    padding: "8px 10px",
+    borderRadius: 8,
+    border: "none",
+    background: "#f3f4f8",
     color: "#301b5b",
+    fontSize: 13,
+    boxSizing: "border-box",
   },
   blockLabel: {
     display: "block",
     fontWeight: 700,
     marginBottom: 6,
     color: "#301b5b",
+    fontSize: 13,
   },
-    actionButton: {
+
+  /* Action buttons */
+  actionButton: {
     padding: "12px 28px",
     background: "#004aad",
     color: "#fff",
     textDecoration: "none",
-    borderRadius: "25px", // more rounded corners
-    transition: "all 0.3s ease", // subtle shadow
-    fontWeight: "bold",
+    borderRadius: 24,
+    transition: "all 0.18s ease",
+    fontWeight: 700,
+    border: "none",
+    cursor: "pointer",
+    boxShadow: "0 6px 18px rgba(48,27,91,0.12)",
+  },
+
+  /* helper responsive widths for the two-column layout in step 1 */
+  leftColumn: {
+    flex: 1,
+    minWidth: 300,
+  },
+  rightColumn: {
+    width: 360,
+    minWidth: 260,
+  },
+  cardOption: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    border: "1px solid #e6e6ee",
+    borderRadius: 8,
+    background: "#fff",
+    minWidth: 96,
+    minHeight: 64,
+    cursor: "pointer",
+    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+  },
+  cardImage: {
+    height: 36,
+    objectFit: "contain",
+  },
+
+  /* custom radio visuals (circle left of logo) */
+  radioOuter: {
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    border: "2px solid #6b6b7a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    background: "transparent",
+  },
+  radioInner: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    background: "transparent",
+    transition: "background 0.15s ease",
+  },
+  radioOuterActive: {
+    borderColor: "#301b5b",
+  },
+  radioInnerActive: {
+    background: "#301b5b",
   },
 };
