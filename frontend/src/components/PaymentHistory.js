@@ -288,7 +288,6 @@ const styles = {
   },
   tableContainer: {
     backgroundColor: "#fff",
-    borderRadius: "12px",
     overflow: "hidden",
     boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
     marginBottom: "20px",
@@ -298,12 +297,10 @@ const styles = {
     borderCollapse: "collapse",
   },
   th: {
-    padding: "15px 20px",
+    backgroundColor: "#143664ff",
+    color: "white",
+    padding: "10px",
     textAlign: "left",
-    borderBottom: "2px solid #eee",
-    color: "#444",
-    fontWeight: "600",
-    fontSize: "14px",
   },
   td: {
     padding: "15px 20px",

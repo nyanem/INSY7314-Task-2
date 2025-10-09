@@ -24,9 +24,9 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [preview, setPreview] = useState(null);
 
   const steps = [
-    { id: 1, label: "Payment Details"},
-    { id: 2, label: "Review"},
-    { id: 3, label: "Confirmation"},
+    { id: 1, label: "Make Payment" },
+    { id: 2, label: "Confirm Payment"},
+    { id: 3, label: "Payment Completion"},
   ];
 
   const goTo = (step) => {
@@ -72,6 +72,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   return (
     <div>
       <div className="stepper" aria-label="payment stepper" style={styles.stepper}>
+        <div style={styles.connector} />
         {steps.map((step, index) => (
           <div key={step.id} style={styles.step}>
             {index > 0 && <div style={{ ...styles.line, ...(currentStep > step.id ? styles.lineCompleted : {}) }}></div>}
@@ -472,6 +473,18 @@ const styles = {
     justifyContent: "center",
     flexWrap: "wrap",
     width: "100%",
+    position: "relative",
+    padding: "12px 20px"
+  },
+  connector:{
+    position: "absolute",
+    left: 12,
+    right: 12,
+    top: "50%",
+    height: 2,
+    background: "#e6e6ee",
+    zIndex: 0,
+    transform: "translateY(-50%)",
   },
   step: {
     display: "flex",
@@ -479,15 +492,16 @@ const styles = {
     alignItems: "center",
     gap: 8,
     position: "relative",
+    zIndex: 2,
   },
   line: {
-    position: "center",
-    left: -24,
+    position: "absolute",
     top: "50%",
-    width: 24,
+    width: 56,                   // adjust length to bridge to previous circle
     height: 2,
     background: "#e6e6ee",
     transform: "translateY(-50%)",
+    pointerEvents: "none",
   },
   lineCompleted: {
     background: "#301b5b",
@@ -502,6 +516,7 @@ const styles = {
     background: "#f1f1f6",
     color: "#6b6b7a",
     fontWeight: 700,
+    zIndex: 3,
   },
   circleActive: {
     background: "#301b5b",
