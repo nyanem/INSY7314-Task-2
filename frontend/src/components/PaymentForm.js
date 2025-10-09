@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Header from "./Navbar";
 import SessionTimeout from "./timer";
-import Dashboard from "./Dashboard";
 
 const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -23,9 +22,9 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [preview, setPreview] = useState(null);
 
   const steps = [
-    { id: 1, label: "Make payment", content: "Enter card details and amount to pay." },
-    { id: 2, label: "Confirm payment", content: "Review the payment details and confirm." },
-    { id: 3, label: "Payment completion", content: "Payment successful — show receipt and next actions." },
+    { id: 1},
+    { id: 2},
+    { id: 3},
   ];
 
   const goTo = (step) => {
@@ -34,7 +33,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
     if (typeof onStepChange === "function") onStepChange(next);
   };
 
-  const handleNext = () => goTo(currentStep + 1);
   const handleBack = () => goTo(currentStep - 1);
 
   const handleConfirm = () => {
@@ -236,7 +234,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 <div style={{ marginTop: 18 }}>
                   <button
                     type="button"
-                    style={styles.payNowButton}
+                    style={styles.actionButton}
                     onClick={handleConfirm}
                   >
                     Pay Now
@@ -306,17 +304,17 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
               </div>
             </section>
 
-            <div style={{ borderTop: "1px solid #e6e6ee", marginTop: 20, paddingTop: 18, textAlign: "center" }}>
+            <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 24 }}>
               <button
                 onClick={handleBack}
-                style={styles.backButton}
+                style={styles.actionButton}
               >
                 Back
               </button>
 
               <button
                 onClick={handleConfirm}
-                style={styles.confirmButton}
+                style={styles.actionButton}
               >
                 Confirm
               </button>
@@ -394,29 +392,10 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
             </div>
           </div>
           
-          <div style={{ marginTop: 24 }}>
-            <button onClick={() => goTo(1)} style={{
-              padding: "10px 24px",
-              background: "#301b5b",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontWeight: 600,
-              cursor: "pointer"
-            }}>Make another payment</button>
-          </div>
-
-          <div style={{ marginTop: 24 }}>
-            <button onClick={() => window.location.href = "/dashboard"} style={{
-              padding: "10px 24px",
-              background: "#301b5b",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontWeight: 600,
-              cursor: "pointer"
-            }}>Dashboard</button>
-          </div>
+            <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 24 }}>
+                <button onClick={() => goTo(1)} style={styles.actionButton}>Make another payment</button>
+                <button onClick={() => (window.location.href = "/dashboard")} style={styles.actionButton}>Dashboard</button>
+            </div>
         </div>
       )}
 
@@ -505,6 +484,8 @@ const styles = {
     borderRadius: 12,
     boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
     maxWidth: 980,
+    margin: "0 auto", // Center horizontally
+    width: "100%", // Ensure it takes available width up to maxWidth
   },
   cardSelectButton: {
     padding: 8,
@@ -556,38 +537,13 @@ const styles = {
     marginBottom: 6,
     color: "#301b5b",
   },
-  payNowButton: {
-    width: "100%",
-    padding: "14px 18px",
-    background: "#301b5b",
+    actionButton: {
+    padding: "12px 28px",
+    background: "#004aad",
     color: "#fff",
-    borderRadius: 12,
-    border: "none",
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-  backButton: {
-    marginRight: 12,
-    padding: "10px 18px",
-    borderRadius: 8,
-    border: "1px solid #dcdce6",
-    background: "#fff",
-    cursor: "pointer",
-  },
-  confirmButton: {
-    padding: "12px 36px",
-    background: "#301b5b",
-    color: "#fff",
-    border: "none",
-    borderRadius: 12,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-  simpleButton: {
-    padding: "8px 12px",
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    background: "#fff",
-    cursor: "pointer",
+    textDecoration: "none",
+    borderRadius: "25px", // more rounded corners
+    transition: "all 0.3s ease", // subtle shadow
+    fontWeight: "bold",
   },
 };
