@@ -4,7 +4,7 @@ import SessionTimeout from "./timer";
 import mastercard from "../assets/mastercard.png";
 import visa from "../assets/visa.png";
 
-const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
+const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300, onTimeout, onReset } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
 
   const [form, setForm] = useState({
@@ -71,12 +71,11 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
 
   return (
     <div>
+      {/* fixed stepper (stays visible when scrolling) */}
       <div className="stepper" aria-label="payment stepper" style={styles.stepper}>
         <div style={styles.connector} />
-        {steps.map((step, index) => (
+        {steps.map((step) => (
           <div key={step.id} style={styles.step}>
-            {index > 0 && <div style={{ ...styles.line, ...(currentStep > step.id ? styles.lineCompleted : {}) }}></div>}
-
             <div
               style={{
                 ...styles.circle,
@@ -91,9 +90,19 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
         ))}
       </div>
 
+      {/* spacer to prevent the fixed stepper covering the card content; adjust height if needed */}
+      <div aria-hidden="true" style={{ height: 120 }} />
+
       <div style={{ ...styles.card, marginTop: 24 }}>
-        <h3 style={{ textTransform: "capitalize" }}>{stepData.label}</h3>
-        <p>{stepData.content}</p>
+        {/* heading centered; timer positioned to the right inside the card */}
+        <div style={{ position: "relative", paddingRight: 80, paddingBottom: 18 }}>
+          <h3 style={styles.cardHeading}>{stepData.label}</h3>
+          <div style={styles.timerWrapper}>
+            <SessionTimeout timeLimitSeconds={timeLimitSeconds} onTimeout={onTimeout} onReset={onReset} />
+          </div>
+        </div>
+
+        <p style={{ textAlign: "center", marginTop: 8, color: "#6b6b7a" }}>{stepData.content}</p>
 
         {currentStep === 1 && (
           <form
@@ -457,8 +466,14 @@ export default function PaymentForm() {
       <Header />
 
       <main className="container">
-        <SessionTimeout timeLimitSeconds={300} onTimeout={handleTimeout} onReset={handleReset} />
-        <PaymentStepper key={resetKey} initialStep={1} />
+        {/* SessionTimeout moved inside the card and passed into stepper so it appears inline with the heading */}
+        <PaymentStepper
+          key={resetKey}
+          initialStep={1}
+          timeLimitSeconds={300}
+          onTimeout={handleTimeout}
+          onReset={handleReset}
+        />
       </main>
     </div>
   );
@@ -466,23 +481,26 @@ export default function PaymentForm() {
 
 const styles = {
   stepper: {
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-50%)",
+    top: "120px",
+    zIndex: 2000,
+    width: "min(980px, 96%)",
     display: "flex",
     gap: 16,
     alignItems: "center",
     justifyContent: "center",
-    flexWrap: "wrap",
-    width: "100%",
-    position: "sticky",
-    top: 80,
+    padding: "8px 20px",
+    height: 80,            // increase so stacked circle+label is centered
     background: "transparent",
-    zIndex: 1000,
-    padding: "12px 20px"
+    pointerEvents: "none",
   },
-  connector:{
+  connector: {
     position: "absolute",
-    left: 12,
-    right: 12,
-    top: "50%",
+    left: "22%",
+    right: "22%",
+    top: "40%",            // center line vertically in the stepper
     height: 2,
     background: "#e6e6ee",
     zIndex: 0,
@@ -495,15 +513,9 @@ const styles = {
     gap: 8,
     position: "relative",
     zIndex: 2,
-  },
-  line: {
-    position: "absolute",
-    top: "50%",
-    width: 56,                   // adjust length to bridge to previous circle
-    height: 2,
-    background: "#e6e6ee",
-    transform: "translateY(-50%)",
-    pointerEvents: "none",
+    pointerEvents: "auto",
+    /* ensure the stack is vertically centered inside the taller stepper */
+    justifyContent: "center",
   },
   lineCompleted: {
     background: "#301b5b",
@@ -532,7 +544,7 @@ const styles = {
     fontSize: 13,
     color: "#6b6b7a",
     marginLeft: 0,
-    marginBottom:6,
+    marginBottom: 6,
     textAlign: "center",
   },
 
@@ -545,6 +557,26 @@ const styles = {
     maxWidth: 980,
     margin: "0 auto",
     width: "100%",
+  },
+  cardHeading: {
+    textTransform: "capitalize",
+    textAlign: "center",
+    margin: 0,
+    marginBottom: 42,   // <-- add spacing under the heading
+    fontSize: 20,
+    color: "#301b5b",
+    fontWeight: 700,
+  },
+  timerWrapper: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    padding: "12px",
+    display: "flex",
+    alignItems: "center",
+    height: "100%",
+    color: "#6b6b7a",
+    fontSize: 12,
   },
 
   /* Card type buttons (VISA / Mastercard) */

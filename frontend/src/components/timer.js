@@ -103,8 +103,8 @@ const styles = {
     gap: "5px",
   },
   timeBox: {
-    width: "60px",
-    height: "60px",
+    width: "30px",
+    height: "30px",
     backgroundColor: "#b4aee8", // Light purple color like in the image
     borderRadius: "12px",
     display: "flex",
