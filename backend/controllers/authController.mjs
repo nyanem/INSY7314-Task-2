@@ -5,6 +5,7 @@ import { validationResult } from 'express-validator';
 import Customer from '../models/Customer.mjs';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import { encrypt, decrypt, hmacHex } from '../utils/encryption.mjs';
 
 // Register handler
 export const register = async (req, res) => {
@@ -25,14 +26,20 @@ export const register = async (req, res) => {
     // Destructure request body
     const { firstName, middleName, lastName, idNumber, accountNumber, password } = req.body;
 
-    // Additional defensive checks (sanity limits)
-    const maxFieldLengthRegister = 200; // prevent buffer overflow attempts
+    // Additional defensive checks - sanity limits
+
+    // prevent buffer overflow attempts
+    const maxFieldLengthRegister = 200; 
     const fields = { firstName, middleName, lastName, idNumber, accountNumber, password };
     for (const [key, value] of Object.entries(fields)) {
       if (typeof value === 'string' && value.length > maxFieldLengthRegister) {
         return res.status(400).json({ message: `${key} too long` });
       }
     }
+
+    // Use deterministic HMACs for uniqueness checks & lookups
+    const idHash = hmacHex(idNumber);
+    const acctHash = hmacHex(accountNumber);
 
     // Check if customer already exists
    const existing = await Customer.findOne({ $or: [{ idNumber }, { accountNumber }] });
@@ -45,11 +52,13 @@ export const register = async (req, res) => {
 
     // Create and save the new customer
     const customer = new Customer({
-      firstName,
-      middleName,
-      lastName,
-      idNumber,
-      accountNumber,
+      firstName: encrypt(firstName),
+      middleName: encrypt(middleName || ''),
+      lastName: encrypt(lastName),
+      idNumber: encrypt(idNumber),
+      idNumberHash: idHash,
+      accountNumber: encrypt(accountNumber),
+      accountNumberHash: acctHash,
       passwordHash,
     });
     await customer.save();
@@ -89,19 +98,32 @@ export const login = async (req, res) => {
     if (nameParts.length < 2) {
       return res.status(400).json({ message: 'Please provide both first and last name in userName' });
     }
-    const firstName = nameParts[0].toLowerCase();
-    const lastName = nameParts.slice(1).join(' ').toLowerCase();
+    const firstNameInput = nameParts[0].toLowerCase();
+    const lastNameInput = nameParts.slice(1).join(' ').toLowerCase();
 
     // Find customer by first name, last name, and account number
-    const customer = await Customer.findOne({ firstName, lastName, accountNumber });
-    if (!customer || !(await argon2.verify(customer.passwordHash, password))) {
+    const acctHash = hmacHex(accountNumber);
+    const customer = await Customer.findOne({ accountNumberHash: acctHash });
+    if (!customer) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    const passwordOk = await argon2.verify(customer.passwordHash, password);
+    if (!passwordOk) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const decryptedFirst = decrypt(customer.firstName).toLowerCase();
+    const decryptedLast = decrypt(customer.lastName).toLowerCase();
+
+    if (decryptedFirst !== firstNameInput || decryptedLast !== lastNameInput) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       { id: customer._id, role: customer.role },
-      process.env.JWT_SECRET,         // uses your secret from .env
+      process.env.JWT_SECRET,         // uses our secret from .env
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
