@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import Header from "./components/header";
+import SessionTimeout from "./components/timer";
 
 const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
 
-  // --- form state for "Make payment" ---
   const [form, setForm] = useState({
     cardType: "visa",
     cardNumber: "",
@@ -17,7 +18,8 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
     swift: "",
   });
 
-  const [savedPayment, setSavedPayment] = useState(null); // persisted when confirmed
+  const [savedPayment, setSavedPayment] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const steps = [
     { id: 1, label: "Make payment", content: "Enter card details and amount to pay." },
@@ -34,10 +36,8 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const handleNext = () => goTo(currentStep + 1);
   const handleBack = () => goTo(currentStep - 1);
 
-  // validate minimal required fields before advancing
   const handleConfirm = () => {
     if (currentStep === 1) {
-      // simple validation
       const required = ["cardNumber", "cardholder", "expiryMonth", "expiryYear", "ccv", "amount"];
       const missing = required.filter((k) => !form[k]);
       if (missing.length) {
@@ -45,14 +45,14 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
         return;
       }
 
-      // save snapshot for confirmation/completion steps
-      setSavedPayment({ ...form, confirmedAt: new Date().toISOString() });
+      const snapshot = { ...form, confirmedAt: new Date().toISOString() };
+      setSavedPayment(snapshot);
+      setPreview(snapshot);
       goTo(2);
       return;
     }
 
     if (currentStep === 2) {
-      // simulate submission
       setTimeout(() => {
         goTo(3);
       }, 400);
@@ -66,8 +66,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
 
   const handleCardSelect = (type) => setForm((s) => ({ ...s, cardType: type }));
 
-  const isFirst = currentStep === 1;
-  const isLast = currentStep === steps.length;
   const stepData = steps.find((s) => s.id === currentStep) || steps[0];
 
   return (
@@ -90,12 +88,10 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
         ))}
       </div>
 
-      {/* Step content area */}
       <div className="card" style={{ marginTop: 24 }}>
         <h3 style={{ textTransform: "capitalize" }}>{stepData.label}</h3>
         <p>{stepData.content}</p>
 
-        {/* --- STEP 1: Payment form --- */}
         {currentStep === 1 && (
           <form
             onSubmit={(e) => {
@@ -105,7 +101,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
             style={{ marginTop: 16 }}
           >
             <div style={{ display: "flex", gap: 32, alignItems: "flex-start" }}>
-              {/* left column: card details */}
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
                   <button
@@ -137,10 +132,10 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <label
                     style={{
-                      width: 180, /* or use flexBasis: "140px" */
+                      width: 180,
                       fontWeight: 700,
                       color: "#301b5b",
-                      marginBottom: 0, /* remove block spacing since label is inline now */
+                      marginBottom: 0,
                     }}
                   >
                     Card Number
@@ -157,10 +152,10 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <label
                     style={{
-                      width: 120, /* or use flexBasis: "140px" */
+                      width: 120,
                       fontWeight: 700,
                       color: "#301b5b",
-                      marginBottom: 0, /* remove block spacing since label is inline now */
+                      marginBottom: 0,
                     }}
                   >
                     Cardholder
@@ -217,7 +212,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 </div>
               </div>
 
-              {/* right column: amount + provider */}
               <div style={{ width: 340 }}>
                 <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
                   <label style={{ display: "block", fontWeight: 700, marginBottom: 6, color: "#301b5b"}}>Enter Amount</label>
@@ -229,7 +223,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                     style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd", background: "#fff", color: "#301b5b" }}
                   />
                 </div>
-
 
                 <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
                   <label style={{ display: "block", fontWeight: 700, marginBottom: 6, color: "#301b5b"}}>Currency</label>
@@ -269,7 +262,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
 
                 <div style={{ marginTop: 18 }}>
                   <button
-                    type="submit"
+                    type="button"
                     style={{
                       width: "100%",
                       padding: "14px 18px",
@@ -279,8 +272,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                       border: "none",
                       fontWeight: 700,
                     }}
-
-                    onClick={handleNext}
+                    onClick={handleConfirm}
                   >
                     Pay Now
                   </button>
@@ -290,23 +282,96 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
           </form>
         )}
 
-        {/* --- STEP 2: Confirmation --- */}
-        {currentStep === 2 && (
-          <div style={{ marginTop: 12 }}>
-            <h4>Confirm Payment</h4>
-            <pre style={{ background: "#f6f6f6", padding: 12, borderRadius: 8 }}>
-              {JSON.stringify(savedPayment || form, null, 2)}
-            </pre>
-            <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-              <button onClick={handleBack}>Back</button>
-              <button onClick={handleConfirm} style={{ background: "#16a34a", color: "#fff", padding: "8px 12px" }}>
-                Submit Payment
-              </button>
-            </div>
-          </div>
-        )}
+        {currentStep === 2 && (() => {
+          const data = preview ?? savedPayment ?? form ?? {};
 
-        {/* --- STEP 3: Completion --- */}
+          const maskCard = (num = "") => {
+            const digits = (num || "").replace(/\s+/g, "");
+            if (!digits) return "**** **** **** **";
+            const last2 = digits.slice(-2);
+            return "**** **** **** **" + last2;
+          };
+
+          const maskSwift = (s = "") => {
+            if (!s) return "";
+            if (s.length <= 2) return "*".repeat(s.length);
+            const last = s.slice(-1);
+            return "*".repeat(s.length - 1) + last;
+          };
+
+          const expiry = data.expiryMonth || data.expiryYear ? `${data.expiryMonth || "--"}/${data.expiryYear || "--"}` : "";
+
+          return (
+            <div style={{ marginTop: 12, maxWidth: 760 }}>
+              <h2 style={{ textAlign: "center", color: "#301b5b", marginBottom: 18 }}>Payment Confirmation</h2>
+
+              <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16 }}>
+                <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Account Details</h4>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
+                  <div style={{ color: "#6b6b7a" }}>Card Number</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{maskCard(data.cardNumber)}</div>
+
+                  <div style={{ color: "#6b6b7a" }}>Cardholder</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{data.cardholder || "—"}</div>
+
+                  <div style={{ color: "#6b6b7a" }}>Expiry Date</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{expiry || "—"}</div>
+
+                  <div style={{ color: "#6b6b7a" }}>CCV</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{data.ccv || "—"}</div>
+                </div>
+              </section>
+
+              <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16, marginTop: 18 }}>
+                <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Payment Summary</h4>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
+                  <div style={{ color: "#6b6b7a" }}>Provider</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{data.provider || "—"}</div>
+
+                  <div style={{ color: "#6b6b7a" }}>SWIFT Code</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{maskSwift(data.swift)}</div>
+
+                  <div style={{ color: "#6b6b7a" }}>Total Amount</div>
+                  <div style={{ textAlign: "right", fontWeight: 700 }}>{(data.currency || "R") + " " + (data.amount || "0.00")}</div>
+                </div>
+              </section>
+
+              <div style={{ borderTop: "1px solid #e6e6ee", marginTop: 20, paddingTop: 18, textAlign: "center" }}>
+                <button
+                  onClick={handleBack}
+                  style={{
+                    marginRight: 12,
+                    padding: "10px 18px",
+                    borderRadius: 8,
+                    border: "1px solid #dcdce6",
+                    background: "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  Back
+                </button>
+
+                <button
+                  onClick={handleConfirm}
+                  style={{
+                    padding: "12px 36px",
+                    background: "#301b5b",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
         {currentStep === 3 && (
           <div style={{ marginTop: 12 }}>
             <h4>Payment Completed</h4>
@@ -319,39 +384,30 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
             </div>
           </div>
         )}
-
-        {/* Controls kept for keyboard navigation if needed
-        <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
-          <button onClick={handleBack} disabled={isFirst}>
-            Back
-          </button>
-
-          {!isLast && (
-            <>
-              <button onClick={handleNext} style={{ background: "#1a73e8", color: "#fff" }}>
-                Next
-              </button>
-
-              <button onClick={handleConfirm} style={{ background: "#16a34a", color: "#fff" }}>
-                Confirm
-              </button>
-            </>
-          )}
-
-          {isLast && (
-            <button
-              onClick={() => {
-                goTo(1);
-              }}
-              style={{ background: "#6b21a8", color: "#fff" }}
-            >
-              Finish
-            </button>
-          )}
-        </div> */}
       </div>
     </div>
   );
 };
 
-export default PaymentStepper;
+export default function PaymentPage() {
+  const [resetKey, setResetKey] = useState(0);
+
+  const handleTimeout = () => {
+    setResetKey((k) => k + 1);
+  };
+
+  const handleReset = () => {
+    // optional: remount stepper or reset timer
+  };
+
+  return (
+    <div className="app-root">
+      <Header />
+
+      <main className="container">
+        <SessionTimeout timeLimitSeconds={300} onTimeout={handleTimeout} onReset={handleReset} />
+        <PaymentStepper key={resetKey} initialStep={1} />
+      </main>
+    </div>
+  );
+}
