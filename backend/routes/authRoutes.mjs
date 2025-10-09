@@ -3,7 +3,8 @@
 // Imports necessary for the Auth Route Setup
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login } from '../controllers/authController.mjs';
+import { register, login, getCurrentUser } from '../controllers/authController.mjs';
+import { authMiddleware } from '../middleware/secure.mjs';
 
 // Create router
 const router = express.Router();
@@ -91,6 +92,8 @@ router.post(
   ],
   login
 );
+
+router.get('/me', authMiddleware, getCurrentUser);
 
 // Export the router
 export default router;

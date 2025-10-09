@@ -127,6 +127,14 @@ export const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
+    // Send JWT in HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,      // not accessible by JS
+      secure: true,        // only over HTTPS
+      sameSite: 'strict',  // CSRF protection
+      maxAge: 60 * 60 * 1000 // 1 hour
+    });
+
     // Authentication successful
     res.status(200).json({
       message: 'Login successful',
@@ -140,4 +148,29 @@ export const login = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// GET /api/auth/me
+export const getCurrentUser = async (req, res) => {
+  try {
+    // authMiddleware should decode the JWT and attach user info
+    const userId = req.user?.id;
+
+    if (!userId)
+      return res.status(401).json({ message: "Not authenticated" });
+
+    const customer = await Customer.findById(userId);
+    if (!customer)
+      return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      fullName: `${decrypt(customer.firstName)} ${decrypt(customer.lastName)}`,
+      accountNumber: decrypt(customer.accountNumber),
+      role: customer.role,
+    });
+  } catch (err) {
+    console.error("getCurrentUser error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

@@ -1,29 +1,51 @@
 import React, { useState } from "react";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 const Register = () => {
   const [formData, setFormData] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     idNumber: "",
     accountNumber: "",
-    username: "",
     password: "",
   });
-  // Inside Register component:
-const navigate = useNavigate();
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  alert("Registration successful!");
-  navigate("/dashboard");
-};
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      // Make sure your backend is running on this URL
+      const res = await axios.post("https://localhost:5000/api/auth/register", formData, {
+        withCredentials: true,
+      });
+
+      if (res.status === 201) {
+        setSuccess("Registration successful!");
+        setTimeout(() => navigate("/login"), 1500);
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      if (err.response) {
+        setError(err.response.data.message || "Registration failed");
+      } else {
+        setError("Could not connect to server");
+      }
+    }
+  };
 
   return (
     <div>
@@ -41,31 +63,28 @@ const handleSubmit = (e) => {
               <input
                 type="text"
                 name="firstName"
-                placeholder="First Name"
+                placeholder="Enter your first name"
                 value={formData.firstName}
                 onChange={handleChange}
                 style={styles.input}
                 required
-              /> 
-               <input
+              />
+              <input
                 type="text"
-                name="accountNumber"
-                placeholder="Account Number"
-                value={formData.accountNumber}
+                name="middleName"
+                placeholder="Enter your middle name"
+                value={formData.middleName}
                 onChange={handleChange}
                 style={styles.input}
-                required
               />
-               
-              
             </div>
 
             {/* Row 2 */}
             <div style={styles.inputRow}>
-           <input
+              <input
                 type="text"
                 name="lastName"
-                placeholder="Last Name"
+                placeholder="Enter your last name"
                 value={formData.lastName}
                 onChange={handleChange}
                 style={styles.input}
@@ -73,9 +92,9 @@ const handleSubmit = (e) => {
               />
               <input
                 type="text"
-                name="username"
-                placeholder="Username"
-                value={formData.username}
+                name="accountNumber"
+                placeholder="Enter your account number"
+                value={formData.accountNumber}
                 onChange={handleChange}
                 style={styles.input}
                 required
@@ -84,20 +103,19 @@ const handleSubmit = (e) => {
 
             {/* Row 3 */}
             <div style={styles.inputRow}>
-                <input
+              <input
                 type="text"
                 name="idNumber"
-                placeholder="ID Number"
+                placeholder="Enter your ID number"
                 value={formData.idNumber}
                 onChange={handleChange}
                 style={styles.input}
                 required
               />
-              
               <input
                 type="password"
                 name="password"
-                placeholder="Password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 style={styles.input}
@@ -105,14 +123,17 @@ const handleSubmit = (e) => {
               />
             </div>
 
-            <button Link to="/dashboard" type="submit" style={styles.registerButton}>Register</button>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+            {success && <p style={{ color: "green" }}>{success}</p>}
+
+            <button type="submit" style={styles.registerButton}>
+              Register
+            </button>
           </form>
         </div>
       </div>
     </div>
   );
-
-  
 };
 
 const styles = {

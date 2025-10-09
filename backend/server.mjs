@@ -30,7 +30,7 @@ const app = express();
 
 // Enable CORS only from your frontend origin
 app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || '*',
+  origin: process.env.FRONTEND_ORIGIN || 'https://localhost:3000',
   methods: ['GET','POST','PUT','DELETE'],
   credentials: true
 }));
@@ -38,15 +38,16 @@ app.use(cors({
 // Parse incoming JSON
 app.use(express.json({ limit: '10kb' }));
 
+// Parse cookies
 app.use(cookieParser());
 
+// Prevent HTTP parameter Pollution
 app.use(hpp());
 
-app.use(mongoSanitize({
-  replaceWith: '_'
-}));
+// Sanitize MongoDB queries to prevent NoSQL injection
+app.use(mongoSanitize({ replaceWith: '_'}));
 
-
+// Prevent XSS attacks
 app.use(xss());
 
 // Helmet security headers configuration
@@ -63,7 +64,7 @@ app.use(
   '/api/auth/',
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // adjust as needed
+    max: 50, // limit each IP to 50 requests per windowMs
     message: { message: 'Too many requests, please try again later.' },
   })
 );
@@ -71,6 +72,8 @@ app.use(
 // Enforce HTTPS redirect and security headers - CSP, X-Frame, HSTS
 app.use(enforceHTTPS);
 app.use(securityHeaders);
+
+// Routes
 
 // Onboarding routes
 app.use('/api/onboarding', onboardingRoutes);
@@ -88,30 +91,16 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.get('/start', (req, res) => {
-  res.send('<h1>Get Started Page</h1>');
-});
+app.get('/start', (req, res) => { res.send('<h1>Get Started Page</h1>'); });
 
-app.get('/register', (req, res) => {
-  res.send('<h1>Register Page</h1>');
-});
+app.get('/register', (req, res) => { res.send('<h1>Register Page</h1>'); });
 
-app.get('/login', (req, res) => {
-  res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>');
-});
-
-// NB: make sure your .env has ATLAS_URI for the connection string - you'll have to create your own .env file and also add the port number in there, mine is PORT=5000
+app.get('/login', (req, res) => { res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>'); });
 
 // MongoDB connection
-
-
-const mongoURI = process.env.MONGO_URI;
-
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('MongoDB connection failed', err));
-
-  // NB: make sure you generate your own keys and place them in the keys folder, this is ignored by git for security reasons - certificate.pem and privatekey.pem
+mongoose.connect(process.env.ATLAS_URI)
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection failed', err));
 
 // HTTPS options
 const httpsOptions = {
@@ -120,12 +109,9 @@ const httpsOptions = {
   minVersion: 'TLSv1.3',
 };
 
-// Start HTTP server for local development
+// Start HTTPS server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`Secure server running on https://localhost:${PORT}`);
 });
-
-
-
 //-------------------------------------------------------------------End of File----------------------------------------------------------//
