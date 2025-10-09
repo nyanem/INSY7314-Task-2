@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import Register from "./components/Register";
 import PaymentForm from "./components/PaymentForm";
+import PaymentHistory from "./components/PaymentHistory";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<Register />} />
         <Route path="/paymentForm" element={<PaymentForm />} />
+        <Route path="/paymentHistory" element={<PaymentHistory />} />
 
       </Routes>
     </Router>

@@ -30,8 +30,8 @@ const Dashboard = () => {
             <p style={styles.balance}>R 80 000,00</p>
             <p style={styles.timestamp}>As of 29 August 2025, 5:05 PM</p>
             <div style={styles.actions}>
-              <button style={styles.actionButton}>Make Payment</button>
-              <button style={styles.actionButton}>View Payment History</button>
+              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentForm"}>Make Payment</button>
+              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentHistory"}>View Payment History</button>
             </div>
           </div>
         </div>

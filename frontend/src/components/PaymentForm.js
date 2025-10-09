@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Header from "./Navbar";
 import SessionTimeout from "./timer";
+import Dashboard from "./Dashboard";
 
 const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -247,94 +248,178 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
         )}
 
        
-{currentStep === 2 && (
-  <div style={{ marginTop: 12, maxWidth: 760 }}>
-    <h2 style={{ textAlign: "center", color: "#301b5b", marginBottom: 18 }}>Payment Confirmation</h2>
+        {currentStep === 2 && (
+          <div style={{ marginTop: 12, maxWidth: 760 }}>
+            <h2 style={{ textAlign: "center", color: "#301b5b", marginBottom: 18 }}>Payment Confirmation</h2>
 
-    <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16 }}>
-      <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Account Details</h4>
+            <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16 }}>
+              <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Account Details</h4>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
-        <div style={{ color: "#6b6b7a" }}>Card Number</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>
-          {(() => {
-            const num = (savedPayment?.cardNumber || "").replace(/\s+/g, "");
-            if (!num) return "**** **** **** **";
-            const last2 = num.slice(-2);
-            return "**** **** **** **" + last2;
-          })()}
-        </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
+                <div style={{ color: "#6b6b7a" }}>Card Number</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>
+                  {(() => {
+                    const num = (savedPayment?.cardNumber || "").replace(/\s+/g, "");
+                    if (!num) return "**** **** **** **";
+                    const last2 = num.slice(-2);
+                    return "**** **** **** **" + last2;
+                  })()}
+                </div>
 
-        <div style={{ color: "#6b6b7a" }}>Cardholder</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.cardholder || "—"}</div>
+                <div style={{ color: "#6b6b7a" }}>Cardholder</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.cardholder || "—"}</div>
 
-        <div style={{ color: "#6b6b7a" }}>Expiry Date</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>
-          {savedPayment?.expiryMonth || savedPayment?.expiryYear 
-            ? `${savedPayment?.expiryMonth || "--"}/${savedPayment?.expiryYear || "--"}`
-            : "—"}
-        </div>
+                <div style={{ color: "#6b6b7a" }}>Expiry Date</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>
+                  {savedPayment?.expiryMonth || savedPayment?.expiryYear 
+                    ? `${savedPayment?.expiryMonth || "--"}/${savedPayment?.expiryYear || "--"}`
+                    : "—"}
+                </div>
 
-        <div style={{ color: "#6b6b7a" }}>CCV</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.ccv || "—"}</div>
-      </div>
-    </section>
+                <div style={{ color: "#6b6b7a" }}>CCV</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.ccv || "—"}</div>
+              </div>
+            </section>
 
-    <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16, marginTop: 18 }}>
-      <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Payment Summary</h4>
+            <section style={{ borderTop: "1px solid #e6e6ee", paddingTop: 16, marginTop: 18 }}>
+              <h4 style={{ margin: "0 0 12px 0", color: "#6b6b7a", fontWeight: 700 }}>Payment Summary</h4>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
-        <div style={{ color: "#6b6b7a" }}>Provider</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.provider || "—"}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", rowGap: 12, alignItems: "center" }}>
+                <div style={{ color: "#6b6b7a" }}>Provider</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.provider || "—"}</div>
 
-        <div style={{ color: "#6b6b7a" }}>SWIFT Code</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>
-          {(() => {
-            const s = savedPayment?.swift || "";
-            if (!s) return "";
-            if (s.length <= 2) return "*".repeat(s.length);
-            const last = s.slice(-1);
-            return "*".repeat(s.length - 1) + last;
-          })()}
-        </div>
+                <div style={{ color: "#6b6b7a" }}>SWIFT Code</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>
+                  {(() => {
+                    const s = savedPayment?.swift || "";
+                    if (!s) return "";
+                    if (s.length <= 2) return "*".repeat(s.length);
+                    const last = s.slice(-1);
+                    return "*".repeat(s.length - 1) + last;
+                  })()}
+                </div>
 
-        <div style={{ color: "#6b6b7a" }}>Total Amount</div>
-        <div style={{ textAlign: "right", fontWeight: 700 }}>
-          {(savedPayment?.currency || "R") + " " + (savedPayment?.amount || "0.00")}
-        </div>
-      </div>
-    </section>
+                <div style={{ color: "#6b6b7a" }}>Total Amount</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>
+                  {(savedPayment?.currency || "R") + " " + (savedPayment?.amount || "0.00")}
+                </div>
+              </div>
+            </section>
 
-    <div style={{ borderTop: "1px solid #e6e6ee", marginTop: 20, paddingTop: 18, textAlign: "center" }}>
-      <button
-        onClick={handleBack}
-        style={styles.backButton}
-      >
-        Back
-      </button>
+            <div style={{ borderTop: "1px solid #e6e6ee", marginTop: 20, paddingTop: 18, textAlign: "center" }}>
+              <button
+                onClick={handleBack}
+                style={styles.backButton}
+              >
+                Back
+              </button>
 
-      <button
-        onClick={handleConfirm}
-        style={styles.confirmButton}
-      >
-        Confirm
-      </button>
-    </div>
-  </div>
-)}
-
-        {currentStep === 3 && (
-          <div style={{ marginTop: 12 }}>
-            <h4>Payment Completed</h4>
-            <p>Receipt</p>
-            <pre style={{ background: "#f6f6f6", padding: 12, borderRadius: 8 }}>
-              {JSON.stringify(savedPayment, null, 2)}
-            </pre>
-            <div style={{ marginTop: 12 }}>
-              <button onClick={() => goTo(1)} style={styles.simpleButton}>Make another payment</button>
+              <button
+                onClick={handleConfirm}
+                style={styles.confirmButton}
+              >
+                Confirm
+              </button>
             </div>
           </div>
         )}
+
+
+      {currentStep === 3 && (
+        <div style={{ marginTop: 12, textAlign: "center", maxWidth: 760, margin: "0 auto" }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ 
+              width: 60, 
+              height: 60, 
+              borderRadius: "50%", 
+              background: "#301b5b", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              margin: "0 auto 16px"
+            }}>
+              <div style={{ fontSize: 30, color: "white" }}>✓</div>
+            </div>
+            <h2 style={{ color: "#301b5b", marginBottom: 8 }}>Your Payment was successful!</h2>
+            <p style={{ color: "#6b6b7a", marginBottom: 40 }}>Thank you for the Payment!</p>
+          </div>
+          
+          <div style={{ 
+            textAlign: "left", 
+            maxWidth: 500, 
+            margin: "0 auto", 
+            border: "1px solid #e6e6ee",
+            borderRadius: 12,
+            padding: 32,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+          }}>
+            <h3 style={{ 
+              fontSize: 18, 
+              fontWeight: 700, 
+              marginBottom: 24, 
+              color: "#333", 
+              borderBottom: "1px solid #e6e6ee", 
+              paddingBottom: 12 
+            }}>Payment Summary</h3>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ color: "#6b6b7a", fontWeight: 500 }}>Provider</div>
+              <div style={{ color: "#333", fontWeight: 700 }}>{savedPayment?.provider || "—"}</div>
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ color: "#6b6b7a", fontWeight: 500 }}>SWIFT Code</div>
+              <div style={{ color: "#333", fontWeight: 700 }}>
+                {(() => {
+                  const s = savedPayment?.swift || "";
+                  if (!s) return "";
+                  if (s.length <= 2) return "*".repeat(s.length);
+                  const last = s.slice(-1);
+                  return "*".repeat(s.length - 1) + last;
+                })()}
+              </div>
+            </div>
+            
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              marginTop: 16,
+              paddingTop: 16,
+              borderTop: "1px solid #e6e6ee"
+            }}>
+              <div style={{ color: "#6b6b7a", fontWeight: 500 }}>Total Amount</div>
+              <div style={{ color: "#333", fontWeight: 700, fontSize: 18 }}>
+                {(savedPayment?.currency || "R") + " " + (savedPayment?.amount || "0.00")}
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ marginTop: 24 }}>
+            <button onClick={() => goTo(1)} style={{
+              padding: "10px 24px",
+              background: "#301b5b",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}>Make another payment</button>
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <button onClick={() => window.location.href = "/dashboard"} style={{
+              padding: "10px 24px",
+              background: "#301b5b",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}>Dashboard</button>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   );
