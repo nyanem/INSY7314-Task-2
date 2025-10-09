@@ -164,7 +164,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
 
 
                 <div style={styles.row}>
-                  <label style={{ ...styles.labelField, width: 180 }}>Card Number</label>
+                  <label style={styles.labelField}>Card Number</label>
                   <input
                     name="cardNumber"
                     value={form.cardNumber}
@@ -175,8 +175,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 </div>
 
                 <div style={styles.row}>
-                  <label style={{ ...styles.labelField, width: 120 }}>Cardholder</label>
-
+                  <label style={styles.labelField}>Cardholder</label>
                   <input
                     name="cardholder"
                     value={form.cardholder}
@@ -187,37 +186,37 @@ const PaymentStepper = ({ initialStep = 1, onStepChange } = {}) => {
                 </div>
 
                 
-                  <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                    <label style={styles.blockLabel}>Expiry Date</label>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <input
-                        name="expiryMonth"
-                        value={form.expiryMonth}
-                        onChange={handleChange}
-                        placeholder="MM"
-                        style={{ ...styles.smallInput, width: 80 }}
-                      />
-                      <span style={{ alignSelf: "center" }}>/</span>
-                      <input
-                        name="expiryYear"
-                        value={form.expiryYear}
-                        onChange={handleChange}
-                        placeholder="YY"
-                        style={{ ...styles.smallInput, width: 80 }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-                    <label style={styles.blockLabel}>CCV</label>
+                <div style={styles.row}>
+                  <label style={styles.labelField}>Expiry Date</label>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input
-                      name="ccv"
-                      value={form.ccv}
+                      name="expiryMonth"
+                      value={form.expiryMonth}
                       onChange={handleChange}
-                      placeholder="665"
-                      style={styles.inputFull}
+                      placeholder="MM"
+                      style={{ ...styles.smallInput, width: 72 }}
+                    />
+                    <span style={{ color: "#6b6b7a" }}>/</span>
+                    <input
+                      name="expiryYear"
+                      value={form.expiryYear}
+                      onChange={handleChange}
+                      placeholder="YY"
+                      style={{ ...styles.smallInput, width: 72 }}
                     />
                   </div>
+                </div>
+
+                <div style={styles.row}>
+                  <label style={styles.labelField}>CCV</label>
+                  <input
+                    name="ccv"
+                    value={form.ccv}
+                    onChange={handleChange}
+                    placeholder="665"
+                    style={{ ...styles.smallInput, width: 140 }}
+                  />
+                </div>
                 
               </div>
 
@@ -473,7 +472,10 @@ const styles = {
     justifyContent: "center",
     flexWrap: "wrap",
     width: "100%",
-    position: "relative",
+    position: "sticky",
+    top: 80,
+    background: "transparent",
+    zIndex: 1000,
     padding: "12px 20px"
   },
   connector:{
@@ -566,10 +568,11 @@ const styles = {
 
   /* rows and labels */
   row: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
     marginBottom: 12,
+    display: "grid",
+    gridTemplateColumns: "160px 1fr", // label column + input column
+    alignItems: "center",
+    columnGap: 16,
   },
   labelField: {
     fontWeight: 700,
@@ -579,7 +582,7 @@ const styles = {
     fontSize: 13,
   },
 
-  /* Inputs - muted grey boxes like your screenshot */
+  /* Inputs - muted grey boxes  */
   inputFull: {
     width: "100%",
     padding: "10px 14px",
