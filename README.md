@@ -110,6 +110,10 @@ Collections include:
 Customers – for client registration and onboarding process
 Payments – for authentication data
 
+## Youtube Video
+
+https://www.youtube.com/watch?v=amEYyRhcyNA 
+
 ## Authors
 - Team: PaySmart Group
 - Module: INSY7314
