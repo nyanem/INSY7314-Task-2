@@ -8,32 +8,32 @@ The project implements onboarding and authentication functionalities, ensuring d
 
 ---
 
-## 🧩 Project Structure
+##  Project Structure
 
 INSY7314-Task-2/
 │
 ├── backend/
-│ ├── models/
-│ ├── routes/
-│ ├── middleware/
-│ ├── keys/
-│ │ ├── certificate.pem
-│ │ └── privatekey.pem
-│ ├── server.mjs
-│ ├── package.json
-│ └── .env (⚠️ not included in repo)
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── keys/
+│   │   ├── certificate.pem
+│   │   └── privatekey.pem
+│   ├── server.mjs
+│   ├── package.json
+│   └── .env (⚠️ not included in repo)
 │
 ├── frontend/
-│ ├── src/
-│ ├── public/
-│ ├── package.json
-│ └── .env (optional)
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── .env (optional)
 │
 └── README.md
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### **1. Prerequisites**
 
@@ -46,7 +46,7 @@ Make sure the following are installed on your system:
 
 ---
 
-## ⚙️ Backend Setup
+##  Backend Setup
 
 ### **Step 1: Navigate to the backend directory**
 cd backend
@@ -55,7 +55,7 @@ cd backend
 npm install
 
 ### **Step 3: Create .env file**
-⚠️ Important: The .env file is not pushed to GitHub for security reasons.
+Important: The .env file is not pushed to GitHub for security reasons.
 You need to create your own .env file in the backend folder with the following content:
 PORT=5000
 ATLAS_URI=<your MongoDB Atlas connection string>
@@ -76,7 +76,7 @@ Server running on https://localhost:5000
 
 ---
 
-## 💻 Frontend Setup
+## Frontend Setup
 
 ### **Step 1: Navigate to the frontend directory**
 cd ../frontend
@@ -91,7 +91,7 @@ https://localhost:3000
 
 ---
 
-## 🔗 Connecting Frontend and Backend
+##  Connecting Frontend and Backend
 
 The frontend communicates with the backend API through the following endpoints:
 
@@ -100,3 +100,20 @@ The frontend communicates with the backend API through the following endpoints:
 | `/api/auth/register` | POST     | Register a new user     |
 | `/api/auth/login`    | POST     | Authenticate user login |
 | `/api/onboarding`    | GET/POST | Onboarding process      |
+
+##  Database 
+The application uses MongoDB Atlas as its cloud database.
+Collections include:
+Customers – for client registration and onboarding process
+Payments – for authentication data
+
+## Authors
+- Team: PaySmart Group
+- Module: INSY7314
+- Institution: Varsity College, Cape Town
+- Database: MongoDB Atlas
+- Frontend: React.js
+- Backend: Node.js (Express)
+- Version Control: GitHub + CircleCI
+  
+This readme file was AI generated. 
