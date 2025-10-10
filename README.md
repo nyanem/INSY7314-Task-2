@@ -2,75 +2,101 @@
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
 
-# Getting Started with Create React App
+This repository contains the **International Banking System** — a full-stack web application built using **React (frontend)**, **Node.js/Express (backend)**, and **MongoDB Atlas (cloud database)**.  
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The project implements onboarding and authentication functionalities, ensuring data security and modern web development best practices.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🧩 Project Structure
 
-### `npm start`
+INSY7314-Task-2/
+│
+├── backend/
+│ ├── models/
+│ ├── routes/
+│ ├── middleware/
+│ ├── keys/
+│ │ ├── certificate.pem
+│ │ └── privatekey.pem
+│ ├── server.mjs
+│ ├── package.json
+│ └── .env (⚠️ not included in repo)
+│
+├── frontend/
+│ ├── src/
+│ ├── public/
+│ ├── package.json
+│ └── .env (optional)
+│
+└── README.md
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🚀 Getting Started
 
-### `npm test`
+### **1. Prerequisites**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Make sure the following are installed on your system:
+- [Node.js](https://nodejs.org/en/) (v18+ recommended)
+- npm (comes with Node)
+- A [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account (for cloud database access)
+- Git
+- Visual Studio Code (recommended IDE)
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## ⚙️ Backend Setup
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### **Step 1: Navigate to the backend directory**
+cd backend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### **Step 2: Install Dependencies**
+npm install
 
-### `npm run eject`
+### **Step 3: Create .env file**
+⚠️ Important: The .env file is not pushed to GitHub for security reasons.
+You need to create your own .env file in the backend folder with the following content:
+PORT=5000
+ATLAS_URI=<your MongoDB Atlas connection string>
+JWT_SECRET=<your secret key> 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### **Step 4: HTTPS Keys**
+This project uses self-signed SSL certificates for secure local connections.
+backend/keys/privatekey.pem
+backen/keys/certificate.pem
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### **Step 5: Run the backend**
+npm start
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+If successful you should see: 
+[dotenv] injecting env
+MongoDB connected
+Server running on https://localhost:5000
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 💻 Frontend Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### **Step 1: Navigate to the frontend directory**
+cd ../frontend
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### **Step 2: Install dependencies**
+npm install
 
-### Code Splitting
+### **Step 3: Start the frontend**
+npm start
+If successful you should see: 
+https://localhost:3000
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 🔗 Connecting Frontend and Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The frontend communicates with the backend API through the following endpoints:
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-
+| Route                | Method   | Description             |
+| -------------------- | -------- | ----------------------- |
+| `/api/auth/register` | POST     | Register a new user     |
+| `/api/auth/login`    | POST     | Authenticate user login |
+| `/api/onboarding`    | GET/POST | Onboarding process      |
