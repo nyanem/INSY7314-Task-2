@@ -13,7 +13,10 @@ const Navbar = ({ isLoggedIn }) => {
         <Link to="/" style={styles.navLink}>Home</Link>
         <Link to="/aboutUs" style={styles.navLink}>About Us</Link>
         {isLoggedIn ? (
-          <Link to="/dashboard" style={styles.navLink}>Dashboard</Link>
+          <>
+            <Link to="/dashboard" style={styles.navLink}>Dashboard</Link>
+            <Link to="/paymentForm" style={styles.navLink}>Payment</Link>
+          </>
         ) : (
           <Link to="/login" style={styles.navLink}>Login</Link>
         )}
