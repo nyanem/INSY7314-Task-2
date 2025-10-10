@@ -1,27 +1,51 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // import this
 import Navbar from "./Navbar";
+import axios from "axios";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    userName: "",
     accountNumber: "",
     password: "",
   });
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate(); // hook for navigation
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    // TODO: Add your authentication logic here
-    // For now, we'll just navigate to dashboard
-    alert("Login successful!");
-    navigate("/dashboard"); // navigate to dashboard
+    try {
+      const res = await axios.post(
+        "https://localhost:5000/api/auth/login", 
+        formData, 
+        { withCredentials: true } // important if backend sends cookies
+      );
+
+      if (res.status === 200) {
+        setSuccess(res.data.message || "Login successful!");
+        
+        // Optionally, store JWT in localStorage or context
+        localStorage.setItem("token", res.data.token);
+
+        setTimeout(() => navigate("/dashboard"), 1000);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.response) {
+        setError(err.response.data.message || "Login failed");
+      } else {
+        setError("Could not connect to server");
+      }
+    }
   };
 
   return (
@@ -38,8 +62,8 @@ const Login = () => {
             <div style={styles.inputGroup}>
               <input
                 type="text"
-                name="username"
-                placeholder="Enter your Username"
+                name="userName"
+                placeholder="Enter your username"
                 value={formData.username}
                 onChange={handleChange}
                 style={styles.input}
@@ -48,7 +72,7 @@ const Login = () => {
               <input
                 type="text"
                 name="accountNumber"
-                placeholder="Enter your Account number"
+                placeholder="Enter your account number"
                 value={formData.accountNumber}
                 onChange={handleChange}
                 style={styles.input}
@@ -57,7 +81,7 @@ const Login = () => {
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your Password"
+                placeholder="Enter your assword"
                 value={formData.password}
                 onChange={handleChange}
                 style={styles.input}
@@ -77,8 +101,6 @@ const Login = () => {
     </div>
   );
 };
-
-
 
 const styles = {
   container: {

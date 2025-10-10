@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import logo from "../assets/logo.png"
@@ -6,7 +6,26 @@ import logo from "../assets/logo.png"
 const Index = () => {
 
   // eslint-disable-next-line no-unused-vars
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [landingData, setLandingData] = useState(null);
+
+  useEffect(() => {
+    // fetch landing page data from backend
+    const fetchLandingData = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/onboarding/start`, {
+          method: "GET",
+          credentials: "include", // needed if you later want cookies (JWT) sent
+        });
+        const data = await response.json();
+        setLandingData(data);
+      } catch (error) {
+        console.error("Error fetching landing page data:", error);
+      }
+    };
+
+    fetchLandingData();
+  }, []);
 
 
   return (
