@@ -11,9 +11,9 @@ The project implements onboarding and authentication functionalities, ensuring d
 ##  Project Structure
 
 INSY7314-Task-2/
-│
-├── backend/
-│   ├── models/
+ - backend/
+   -- models/
+   
 │   ├── routes/
 │   ├── middleware/
 │   ├── keys/
