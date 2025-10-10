@@ -10,7 +10,29 @@ The project implements onboarding and authentication functionalities, ensuring d
 
 ##  Project Structure
 
-<pre> ```plaintext INSY7314-Task-2/ │ ├── backend/ │ ├── models/ │ ├── routes/ │ ├── middleware/ │ ├── keys/ │ │ ├── certificate.pem │ │ └── privatekey.pem │ ├── server.mjs │ ├── package.json │ └── .env (⚠️ not included in repo) │ ├── frontend/ │ ├── src/ │ ├── public/ │ ├── package.json │ └── .env (optional) │ └── README.md ``` </pre>
+<pre>
+INSY7314-Task-2/
+│
+├── backend/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── keys/
+│   │   ├── certificate.pem
+│   │   └── privatekey.pem
+│   ├── server.mjs
+│   ├── package.json
+│   └── .env (⚠️ not included in repo)
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── .env (optional)
+│
+└── README.md
+</pre>
+
 
 ---
 
