@@ -11,10 +11,12 @@ import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp'; 
 import cookieParser from 'cookie-parser'; 
+import morgan from 'morgan';
 
 // Import Routes
 import onboardingRoutes from './routes/onboardingRoutes.mjs';
 import authRoutes from './routes/authRoutes.mjs';
+import paymentRoutes from './routes/paymentRoutes.mjs';
 
 // Import security middleware
 import { enforceHTTPS, securityHeaders } from './middleware/secure.mjs';
@@ -36,7 +38,13 @@ app.use(cors({
 }));
 
 // Parse incoming JSON
-app.use(express.json({ limit: '10kb' }));
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    express.json({ limit: '10kb' })(req, res, next);
+  } else {
+    next();
+  }
+});
 
 // Parse cookies
 app.use(cookieParser());
@@ -50,6 +58,10 @@ app.use(mongoSanitize({ replaceWith: '_'}));
 // Prevent XSS attacks
 app.use(xss());
 
+app.use(morgan('tiny'));
+
+/* SERCURITY HEADERS */
+
 // Helmet security headers configuration
 app.use(
   helmet({
@@ -59,7 +71,7 @@ app.use(
   })
 );
 
-// Rate limit to prevent brute-force & DDoS
+// Rate limit to prevent brute-force & DDoS - for endpoints
 app.use(
   '/api/auth/',
   rateLimit({
@@ -69,17 +81,32 @@ app.use(
   })
 );
 
+// Global rate limit for all API routes (payments + others)
+app.use(
+  '/api/',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+  })
+);
+
 // Enforce HTTPS redirect and security headers - CSP, X-Frame, HSTS
 app.use(enforceHTTPS);
 app.use(securityHeaders);
 
-// Routes
+/* Routes */
 
 // Onboarding routes
 app.use('/api/onboarding', onboardingRoutes);
 
 // Auth routes - register and login
 app.use('/api/auth', authRoutes);
+
+// Payments routes
+app.use('/api/payments', paymentRoutes);
 
 // Basic frontend demo routes
 app.get('/', (req, res) => {
@@ -97,10 +124,34 @@ app.get('/register', (req, res) => { res.send('<h1>Register Page</h1>'); });
 
 app.get('/login', (req, res) => { res.send('<h1>Login Page</h1><p>Use your full name, account number and password to log in.</p>'); });
 
+/* 404 and Error Handling */
+
+app.use((req, res) => res.status(404).json({ error: 'Not found' }));
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ error: 'Validation failed', details: err.message });
+  }
+  if (err.name === 'ZodError') {
+    return res.status(400).json({ error: 'Invalid input data', details: err.errors });
+  }
+  if (err.code === 11000) {
+    return res.status(409).json({ error: 'Duplicate entry' });
+  }
+
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+/* Database Connection - MongoDB */
+
 // MongoDB connection
 mongoose.connect(process.env.ATLAS_URI)
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection failed', err));
+
+/* Setting up HTTPS Server Configuration */
 
 // HTTPS options
 const httpsOptions = {
@@ -108,6 +159,8 @@ const httpsOptions = {
   cert: fs.readFileSync('./keys/certificate.pem'),
   minVersion: 'TLSv1.3',
 };
+
+/* Start HTTPS Server */
 
 // Start HTTPS server
 const PORT = process.env.PORT || 5000;
