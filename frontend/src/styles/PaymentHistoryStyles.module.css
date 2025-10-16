@@ -1,0 +1,185 @@
+.container {
+  padding: 40px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  min-height: calc(100vh - 60px);
+}
+
+.title {
+  font-size: 24px;
+  color: #301b5b;
+  text-align: center;
+  margin-bottom: 40px;
+  font-weight: bold;
+}
+
+.filterContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.filterTab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+}
+
+.activeFilterTab {
+  border-bottom: 2px solid #301b5b;
+  color: #301b5b;
+  font-weight: bold;
+}
+
+.dateFilterContainer {
+  position: relative;
+}
+
+.dateFilterButton {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.activeDateFilter {
+  background-color: #301b5b;
+  color: white;
+  border-color: #301b5b;
+}
+
+.dateOptions {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 5px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  width: 150px;
+}
+
+.dateOption {
+  padding: 10px 15px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #eee;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tableContainer {
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  background-color: #143664;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+.td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  font-size: 14px;
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+}
+
+.pendingBadge {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.acceptedBadge {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.rejectedBadge {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.paginationButton {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #301b5b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.pageNumberButton {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #333;
+}
+
+.activePageButton {
+  background-color: #301b5b;
+  color: #fff;
+}
+
+/* Pagination container for button grouping */
+.paginationButtonsContainer {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}

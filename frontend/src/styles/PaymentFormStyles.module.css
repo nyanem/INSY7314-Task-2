@@ -1,0 +1,492 @@
+.stepper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 120px;
+  z-index: 2000;
+  width: min(980px, 96%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  height: 80px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.connector {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 40%;
+  height: 2px;
+  background: #e6e6ee;
+  z-index: 0;
+  transform: translateY(-50%);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  justify-content: center;
+}
+
+.lineCompleted {
+  background: #301b5b;
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f1f6;
+  color: #6b6b7a;
+  font-weight: 700;
+  z-index: 3;
+}
+
+.circleActive {
+  background: #301b5b;
+  color: #fff;
+}
+
+.circleCompleted {
+  background: #dedefe;
+  color: #301b5b;
+}
+
+.label {
+  font-size: 13px;
+  color: #6b6b7a;
+  margin-left: 0;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* Card container */
+.card {
+  background: #fff;
+  padding: 36px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(18, 20, 46, 0.06);
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.cardHeading {
+  text-transform: capitalize;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 42px;
+  font-size: 20px;
+  color: #301b5b;
+  font-weight: 700;
+}
+
+.timerWrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: #6b6b7a;
+  font-size: 12px;
+}
+
+/* Card type buttons */
+.cardSelectButton {
+  padding: 12px;
+  border: 1px solid #e6e6ee;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 80px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.cardSelectButtonActive {
+  border: 2px solid #301b5b;
+  box-shadow: 0 6px 18px rgba(48, 27, 91, 0.08);
+}
+
+/* Form structure */
+.form {
+  width: 100%;
+}
+
+.formColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Rows and labels */
+.row {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.labelField {
+  font-weight: 700;
+  color: #301b5b;
+  margin-bottom: 0;
+  min-width: 140px;
+  font-size: 13px;
+}
+
+/* Inputs */
+.inputFull {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f8;
+  color: #301b5b;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f8;
+  color: #301b5b;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.smallInput {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f8;
+  color: #301b5b;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.blockLabel {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #301b5b;
+  font-size: 13px;
+}
+
+/* Action button */
+.actionButton {
+  padding: 12px 28px;
+  background: #004aad;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 24px;
+  transition: all 0.18s ease;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(48, 27, 91, 0.12);
+}
+
+/* Layout columns */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Card option */
+.cardOption {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border: 1px solid #e6e6ee;
+  border-radius: 8px;
+  background: #fff;
+  min-width: 80px;
+  min-height: 48px;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.cardImage {
+  height: 28px;
+  object-fit: contain;
+}
+
+.cardOptionContainer {
+  display: flex;
+  gap: 12px; /* Reduce gap */
+  margin-bottom: 16px;
+}
+
+/* Radio visuals */
+.radioOuter {
+  width: 16px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #6b6b7a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.radioInner {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.radioOuterActive {
+  border-color: #301b5b;
+}
+
+.radioInnerActive {
+  background: #301b5b;
+}
+
+/* Layout and spacing */
+.spacer {
+  height: 120px;
+}
+
+.cardContainer {
+  margin-top: 24px;
+}
+
+.headingContainer {
+  position: relative;
+  padding-right: 80px;
+  padding-bottom: 18px;
+}
+
+/* Form inputs */
+.dateField {
+  width: 72px;
+}
+
+.ccvField {
+  width: 140px;
+}
+
+.roundedInput {
+  border-radius: 8px;
+}
+
+.swiftInput {
+  background: #f9f9fb;
+  color: #301b5b;
+}
+
+.dateSeparator {
+  color: #6b6b7a;
+}
+
+/* Card options styling */
+.inlineField {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 12px;
+}
+
+/* Confirmation screen */
+.confirmationContainer {
+  margin-top: 12px;
+  max-width: 760px;
+}
+
+.centerHeading {
+  text-align: center;
+  color: #301b5b;
+  margin-bottom: 18px;
+}
+
+.sectionDivider {
+  border-top: 1px solid #e6e6ee;
+  padding-top: 16px;
+}
+
+.sectionMargin {
+  margin-top: 18px;
+}
+
+.sectionHeading {
+  margin: 0 0 12px 0;
+  color: #6b6b7a;
+  font-weight: 700;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  row-gap: 12px;
+  align-items: center;
+}
+
+.summaryLabel {
+  color: #6b6b7a;
+}
+
+.summaryValue {
+  text-align: right;
+  font-weight: 700;
+}
+
+.actionContainer {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* Success screen */
+.successContainer {
+  margin-top: 12px;
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.successMessageContainer {
+  margin-bottom: 24px;
+}
+
+.successIconContainer {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #301b5b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.successIcon {
+  font-size: 30px;
+  color: white;
+}
+
+.successHeading {
+  color: #301b5b;
+  margin-bottom: 8px;
+}
+
+.successMessage {
+  color: #6b6b7a;
+  margin-bottom: 40px;
+}
+
+.receiptContainer {
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 1px solid #e6e6ee;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.receiptHeader {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #333;
+  border-bottom: 1px solid #e6e6ee;
+  padding-bottom: 12px;
+}
+
+.receiptRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.receiptLabel {
+  color: #6b6b7a;
+  font-weight: 500;
+}
+
+.receiptValue {
+  color: #333;
+  font-weight: 700;
+}
+
+.receiptTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e6e6ee;
+}
+
+.receiptTotalValue {
+  color: #333;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f8;
+  color: #301b5b;
+  font-size: 13px;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23301b5b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
