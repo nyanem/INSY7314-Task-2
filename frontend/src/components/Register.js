@@ -3,7 +3,6 @@ import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-
 const Register = () => {
   const [formData, setFormData] = useState({
     firstName: "",

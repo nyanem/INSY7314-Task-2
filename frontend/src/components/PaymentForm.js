@@ -5,6 +5,7 @@ import SessionTimeout from "./timer";
 import mastercard from "../assets/mastercard.png";
 import visa from "../assets/visa.png";
 import styles from "../styles/PaymentFormStyles.module.css";
+import axios from "axios";
 
 const PaymentForm = () => {
   // ---------- CONSTANTS ----------
@@ -65,7 +66,7 @@ const PaymentForm = () => {
     }));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     // Step 1: Initial form submission
     if (currentStep === 1) {
       // Validate form
@@ -77,19 +78,53 @@ const PaymentForm = () => {
         return;
       }
 
-      // Save form data and proceed to confirmation step
-      const paymentSnapshot = { 
-        ...form, 
-        confirmedAt: new Date().toISOString() 
-      };
-      setSavedPayment(paymentSnapshot);
-      goToStep(2);
+      try {
+        const cardNumberClean = form.cardNumber.replace(/\s+/g, "");
+        
+        // Prepare payment data for backend
+        const paymentData = {
+          customerId: form.cardholder,
+          amount: parseFloat(form.amount),
+          currency: form.currency,
+          provider: form.provider || "",
+          swiftCode: form.swift || "",
+          cardBrand: form.cardType,
+          cardNumber: cardNumberClean,
+          cardLast4: cardNumberClean.slice(-4),
+          expiryMonth: form.expiryMonth,
+          expiryYear: form.expiryYear,
+          ccv: form.ccv
+        };
+
+        // Send to backend
+        const response = await axios.post("/api/payments", paymentData, {
+          withCredentials: true
+        });
+
+        // Save response data and proceed to confirmation
+        const paymentSnapshot = { 
+          ...form,
+          paymentId: response.data.id,
+          confirmedAt: new Date().toISOString()
+        };
+        setSavedPayment(paymentSnapshot);
+        goToStep(2);
+
+      } catch (err) {
+        console.error("Payment creation failed:", err);
+        alert(err.response?.data?.message || "Payment failed. Please try again.");
+      }
       return;
     }
 
     // Step 2: Confirm payment
     if (currentStep === 2) {
-      setTimeout(() => goToStep(3), 400);
+      try {
+        setTimeout(() => goToStep(3), 400);
+      } catch (err) {
+        console.error("Payment confirmation failed:", err);
+        alert(err.response?.data?.message || "Confirmation failed. Please try again.");
+      }
     }
   };
 
