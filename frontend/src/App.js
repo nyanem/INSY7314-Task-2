@@ -23,7 +23,7 @@ function App() {
       </Routes>
     </Router>
   );
-}www;
+}
 
 export default App;
 
