@@ -3,7 +3,7 @@
 // Imports necessary for the Auth Route Setup
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, getCurrentUser } from '../controllers/authController.mjs';
+import { register, login, getCurrentUser, loginEmployee  } from '../controllers/authController.mjs';
 import { authMiddleware } from '../middleware/secure.mjs';
 
 // Create router
@@ -94,6 +94,8 @@ router.post(
 );
 
 router.get('/me', authMiddleware, getCurrentUser);
+
+router.post('/login/employee', loginEmployee);
 
 // Export the router
 export default router;

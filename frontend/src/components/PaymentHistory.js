@@ -13,7 +13,6 @@ const PaymentHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch payment history on component mount
   useEffect(() => {
     const fetchPayments = async () => {
       try {
@@ -43,7 +42,6 @@ const PaymentHistory = () => {
     return diffDays <= days;
   };
 
-  // Apply both status and date filters
   const applyFilters = () => {
     let filtered = [...transactions];
     
@@ -52,7 +50,6 @@ const PaymentHistory = () => {
       filtered = filtered.filter(t => t.status.toLowerCase() === activeFilter.toLowerCase());
     }
     
-    // Apply date filter if active
     if (dateFilter) {
       filtered = filtered.filter((t) => isWithinLastDays(t.createdAt, dateFilter));
     }
@@ -83,14 +80,12 @@ const PaymentHistory = () => {
     return pages;
   };
 
-  // Handle date filter selection
   const handleDateFilter = (days) => {
     setDateFilter(days);
     setShowDateOptions(false);
     setCurrentPage(1);
   };
 
-  // Get status badge styling based on status
   const getStatusBadge = (status) => {
     switch(status.toLowerCase()) {
       case "pending":
@@ -109,7 +104,6 @@ const PaymentHistory = () => {
     setCurrentPage(page);
   };
 
-  // Get date filter button text
   const getDateFilterText = () => {
     if (!dateFilter) return "Filter by date";
     if (dateFilter === 7) return "Last 7 Days";
@@ -173,7 +167,7 @@ const PaymentHistory = () => {
             </thead>
             <tbody>
               {currentTransactions.length > 0 ? currentTransactions.map((transaction, index) => {
-                const shortRef = transaction.paymentId.slice(0, 8); // short ref
+                const shortRef = transaction.paymentId.slice(0, 8);
                 return (
                   <tr key={index}>
                     <td style={styles.td}>{shortRef}</td>

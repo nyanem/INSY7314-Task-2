@@ -5,7 +5,6 @@ const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMou
   const [timedOut, setTimedOut] = useState(false);
   const timerRef = useRef(null);
   
-  // Store last reset timestamp in localStorage
   const storeResetTime = () => {
     localStorage.setItem('timerLastReset', Date.now().toString());
   };
@@ -20,7 +19,7 @@ const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMou
     clearInterval(timerRef.current);
     setTimedOut(false);
     setTimeRemaining(timeLimitSeconds);
-    storeResetTime(); // Record when we started the timer
+    storeResetTime();
     
     timerRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -28,15 +27,13 @@ const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMou
           clearInterval(timerRef.current);
           setTimedOut(true);
           
-          // Call timeout callback if provided
           if (typeof onTimeout === "function") onTimeout();
           
-          // Auto reload the page after timeout
           setTimeout(() => {
-            // Mark that we're doing a timeout reload
+
             localStorage.setItem('timerReloading', 'true');
             window.location.reload();
-          }, 2000); // Give 2 seconds to show the timeout message before reload
+          }, 2000);
           
           return 0;
         }
@@ -56,21 +53,17 @@ const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMou
   };
 
   useEffect(() => {
-    // Check if we're coming from a reload
     const reloading = localStorage.getItem('timerReloading') === 'true';
     if (reloading) {
-      // Clear the reload flag
       localStorage.removeItem('timerReloading');
-      // Ensure we start fresh after reload
       resetTimer();
     } else if (startOnMount) {
       startTimer();
     }
     
-    // Set up page visibility change event to handle browser tab switching
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // When tab becomes visible again, reset the timer to ensure accuracy
+
         resetTimer();
       }
     };
@@ -81,8 +74,8 @@ const SessionTimeout = ({ timeLimitSeconds = 300, onTimeout, onReset, startOnMou
       clearInterval(timerRef.current);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLimitSeconds]); // Re-initialize when timeLimitSeconds changes
+
+  }, [timeLimitSeconds]);
 
   return (
     <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, alignItems: "center", marginBottom: 12 }}>
@@ -105,14 +98,14 @@ const styles = {
   timeBox: {
     width: "30px",
     height: "30px",
-    backgroundColor: "#b4aee8", // Light purple color like in the image
+    backgroundColor: "#b4aee8", 
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: "28px",
     fontWeight: "bold",
-    color: "#301b5b", // Dark purple color for text
+    color: "#301b5b", 
     padding: "8px",
   },
   separator: {

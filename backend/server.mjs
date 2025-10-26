@@ -17,12 +17,15 @@ import morgan from 'morgan';
 import onboardingRoutes from './routes/onboardingRoutes.mjs';
 import authRoutes from './routes/authRoutes.mjs';
 import paymentRoutes from './routes/paymentRoutes.mjs';
+import employeeRoutes from './routes/employeeRoutes.mjs'; 
 
-// Import security middleware
+// Import security middleware 
 import { enforceHTTPS, securityHeaders } from './middleware/secure.mjs';
 
 // Import authentication middleware - this will be used once the dashboard and other pages are set up
 import { authMiddleware } from './middleware/secure.mjs';
+import { employeeAuthMiddleware } from './middleware/employeeAuth.mjs';
+import { seedEmployees } from './utils/seedEmployees.mjs';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -108,6 +111,9 @@ app.use('/api/auth', authRoutes);
 // Payments routes
 app.use('/api/payments', paymentRoutes);
 
+// Employee routes - protected
+app.use('/api/employees', employeeAuthMiddleware, employeeRoutes);
+
 // Basic frontend demo routes
 app.get('/', (req, res) => {
   res.send(`
@@ -148,8 +154,15 @@ app.use((err, req, res, next) => {
 
 // MongoDB connection
 mongoose.connect(process.env.ATLAS_URI)
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection failed', err));
+  .then(async () => {
+    console.log('MongoDB connected');
+
+    if (process.env.SEED_EMPLOYEES === 'true') {
+      await seedEmployees();
+    }
+  })
+  .catch(err => console.error('MongoDB connection failed', err));
+
 
 /* Setting up HTTPS Server Configuration */
 

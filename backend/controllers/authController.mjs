@@ -3,6 +3,7 @@
 // Imports necessary for the Auth Controller
 import { validationResult } from 'express-validator';
 import Customer from '../models/Customer.mjs';
+import Employee, { employeeLoginSchema } from '../models/Employee.mjs';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { encrypt, decrypt, hmacHex } from '../utils/encryption.mjs';
@@ -173,4 +174,47 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+export const loginEmployee = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Fetch all employees 
+    const employees = await Employee.find({});
+    let matchedEmployee = null;
+
+    for (const emp of employees) {
+      const decryptedEmail = decrypt(emp.email);
+      if (decryptedEmail === email) {
+        matchedEmployee = emp;
+        break;
+      }
+    }
+
+    if (!matchedEmployee) {
+      console.log(`Login failed: No employee found for email: ${email}`);
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Compare hashed password
+    const isMatch = await matchedEmployee.comparePassword(password);
+    if (!isMatch) {
+      console.log(`Login failed: Password mismatch for email: ${email}`);
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    console.log(`Login successful for: ${email}`);
+    res.status(200).json({
+      message: 'Login successful',
+      employee: {
+        firstName: matchedEmployee.firstName,
+        lastName: matchedEmployee.lastName,
+        email: decrypt(matchedEmployee.email),
+        role: matchedEmployee.role,
+      },
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

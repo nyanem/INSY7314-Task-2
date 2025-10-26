@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // import this
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import axios from "axios";
 
@@ -12,7 +12,7 @@ const Login = () => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const navigate = useNavigate(); // hook for navigation
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,13 +27,12 @@ const Login = () => {
       const res = await axios.post(
         "https://localhost:5000/api/auth/login", 
         formData, 
-        { withCredentials: true } // important if backend sends cookies
+        { withCredentials: true }
       );
 
       if (res.status === 200) {
         setSuccess(res.data.message || "Login successful!");
         
-        // Optionally, store JWT in localStorage or context
         localStorage.setItem("token", res.data.token);
 
         setTimeout(() => navigate("/dashboard"), 1000);
