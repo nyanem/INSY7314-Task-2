@@ -3,25 +3,44 @@ import Header from "./Navbar";
 import SessionTimeout from "./timer";
 import mastercard from "../assets/mastercard.png";
 import visa from "../assets/visa.png";
+import axios from "axios";
 
 const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300, onTimeout, onReset } = {}) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
 
-  const [form, setForm] = useState({
-    cardType: "visa",
+ const [form, setForm] = useState({
+  cardBrand: "VISA",
+  cardNumber: "",
+  cardHolderName: "",
+  expiryMonth: "",
+  expiryYear: "",
+  ccv: "",
+  amount: "",
+  currency: "ZAR",
+  provider: "",
+  swiftCode: "",
+});
+
+
+  const [savedPayment, setSavedPayment] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const handleTimeout = () => {
+  setForm({
+    cardBrand: "VISA",
     cardNumber: "",
-    cardholder: "",
+    cardHolderName: "",
     expiryMonth: "",
     expiryYear: "",
     ccv: "",
     amount: "",
-    currency: "R",
+    currency: "ZAR",
     provider: "",
-    swift: "",
+    swiftCode: "",
   });
-
-  const [savedPayment, setSavedPayment] = useState(null);
-  const [preview, setPreview] = useState(null);
+  setSavedPayment(null);
+  setCurrentStep(1);
+};
 
   const steps = [
     { id: 1, label: "Make Payment" },
@@ -37,9 +56,21 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
 
   const handleBack = () => goTo(currentStep - 1);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (currentStep === 1) {
-      const required = ["cardNumber", "cardholder", "expiryMonth", "expiryYear", "ccv", "amount"];
+      const required = [
+      "cardBrand",
+      "cardNumber",
+      "cardHolderName",
+      "expiryMonth",
+      "expiryYear",
+      "ccv",
+      "amount",
+      "currency",
+      "provider",
+      "swiftCode"
+    ];
+
       const missing = required.filter((k) => !form[k]);
       if (missing.length) {
         alert("Please complete all required fields.");
@@ -54,10 +85,32 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
     }
 
     if (currentStep === 2) {
-      setTimeout(() => {
-        goTo(3);
-      }, 400);
+    try {
+
+      // build payload without storing sensitive info
+      const payload = {
+        ...savedPayment,
+        cardToken: "none",
+        cardNumber: undefined,
+        ccv: undefined,
+        cardLast4: savedPayment.cardNumber.slice(-4),
+        savedAt: new Date().toISOString(),
+      };
+
+      // send to backend
+      const response = await axios.post(
+        "https://localhost:5000/api/payments/createPayment",
+        payload,
+        { withCredentials: true }
+      );
+
+      console.log("Payment saved:", response.data);
+      goTo(3); // success step
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("There was an error processing your payment. Please try again.");
     }
+  }
   };
 
   const handleChange = (e) => {
@@ -65,7 +118,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
     setForm((s) => ({ ...s, [name]: value }));
   };
 
-  const handleCardSelect = (type) => setForm((s) => ({ ...s, cardType: type }));
+  const handleCardSelect = (type) => setForm((s) => ({ ...s, cardBrand: type }));
 
   const stepData = steps.find((s) => s.id === currentStep) || steps[0];
 
@@ -98,7 +151,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
         <div style={{ position: "relative", paddingRight: 80, paddingBottom: 18 }}>
           <h3 style={styles.cardHeading}>{stepData.label}</h3>
           <div style={styles.timerWrapper}>
-            <SessionTimeout timeLimitSeconds={timeLimitSeconds} onTimeout={onTimeout} onReset={onReset} />
+            <SessionTimeout timeLimitSeconds={timeLimitSeconds} onTimeout={handleTimeout} onReset={onReset} />
           </div>
         </div>
 
@@ -119,26 +172,26 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 <label
                     style={{
                     ...styles.cardOption,
-                    ...(form.cardType === "visa" ? styles.cardSelectButtonActive : {}),
+                    ...(form.cardBrand === "visa" ? styles.cardSelectButtonActive : {}),
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
                     paddingLeft: 12,
                     }}
-                    onClick={() => handleCardSelect("visa")}
+                    onClick={() => handleCardSelect("VISA")}
                 >
-                    <div style={{ ...styles.radioOuter, ...(form.cardType === "visa" ? styles.radioOuterActive : {}) }}>
-                    <div style={{ ...styles.radioInner, ...(form.cardType === "visa" ? styles.radioInnerActive : {}) }} />
+                    <div style={{ ...styles.radioOuter, ...(form.cardBrand === "VISA" ? styles.radioOuterActive : {}) }}>
+                    <div style={{ ...styles.radioInner, ...(form.cardBrand === "VISA" ? styles.radioInnerActive : {}) }} />
                     </div>
 
                     <img src={visa} alt="VISA" style={styles.cardImage} />
 
                     <input
                     type="radio"
-                    name="cardType"
-                    value="visa"
-                    checked={form.cardType === "visa"}
-                    onChange={() => handleCardSelect("visa")}
+                    name="cardBrand"
+                    value="VISA"
+                    checked={form.cardBrand === "VISA"}
+                    onChange={() => handleCardSelect("VISA")}
                     style={{ display: "none" }}
                     />
                 </label>
@@ -146,26 +199,26 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 <label
                     style={{
                     ...styles.cardOption,
-                    ...(form.cardType === "mastercard" ? styles.cardSelectButtonActive : {}),
+                    ...(form.cardBrand === "MASTERCARD" ? styles.cardSelectButtonActive : {}),
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
                     paddingLeft: 12,
                     }}
-                    onClick={() => handleCardSelect("mastercard")}
+                    onClick={() => handleCardSelect("MASTERCARD")}
                 >
-                    <div style={{ ...styles.radioOuter, ...(form.cardType === "mastercard" ? styles.radioOuterActive : {}) }}>
-                    <div style={{ ...styles.radioInner, ...(form.cardType === "mastercard" ? styles.radioInnerActive : {}) }} />
+                    <div style={{ ...styles.radioOuter, ...(form.cardBrand === "MASTERCARD" ? styles.radioOuterActive : {}) }}>
+                    <div style={{ ...styles.radioInner, ...(form.cardBrand === "MASTERCARD" ? styles.radioInnerActive : {}) }} />
                     </div>
 
-                    <img src={mastercard} alt="MasterCard" style={styles.cardImage} />
+                    <img src={mastercard} alt="MASTERCARD" style={styles.cardImage} />
 
                     <input
                     type="radio"
-                    name="cardType"
-                    value="mastercard"
-                    checked={form.cardType === "mastercard"}
-                    onChange={() => handleCardSelect("mastercard")}
+                    name="cardBrand"
+                    value="MASTERCARD"
+                    checked={form.cardBrand === "MASTERCARD"}
+                    onChange={() => handleCardSelect("MASTERCARD")}
                     style={{ display: "none" }}
                     />
                 </label>
@@ -186,8 +239,8 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 <div style={styles.row}>
                   <label style={styles.labelField}>Cardholder</label>
                   <input
-                    name="cardholder"
-                    value={form.cardholder}
+                    name="cardHolderName"
+                    value={form.cardHolderName}
                     onChange={handleChange}
                     placeholder="Samantha Jones"
                     style={styles.input}
@@ -249,9 +302,11 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                     onChange={handleChange}
                     style={{ width: 100, padding: 8, borderRadius: 6, border: "1px solid #ddd", background: "#fff", color: "#301b5b" }}
                   >
-                    <option>R</option>
-                    <option>USD</option>
-                    <option>EUR</option>
+                    <option value="ZAR">ZAR</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="JPY">JPY</option>
                   </select>
                 </div>
 
@@ -269,8 +324,8 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
                   <label style={styles.blockLabel}>SWIFT Code</label>
                   <input
-                    name="swift"
-                    value={form.swift}
+                    name="swiftCode"
+                    value={form.swiftCode}
                     onChange={handleChange}
                     placeholder="e.g AAAA-BB-CC-123"
                     style={{ ...styles.inputFull, background: "#f9f9fb", color: "#301b5b" }}
@@ -311,7 +366,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 </div>
 
                 <div style={{ color: "#6b6b7a" }}>Cardholder</div>
-                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.cardholder || "—"}</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.cardHolderName || "—"}</div>
 
                 <div style={{ color: "#6b6b7a" }}>Expiry Date</div>
                 <div style={{ textAlign: "right", fontWeight: 700 }}>
@@ -321,7 +376,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                 </div>
 
                 <div style={{ color: "#6b6b7a" }}>CCV</div>
-                <div style={{ textAlign: "right", fontWeight: 700 }}>{savedPayment?.ccv || "—"}</div>
+                <div style={{ textAlign: "right", fontWeight: 700 }}>***</div>
               </div>
             </section>
 

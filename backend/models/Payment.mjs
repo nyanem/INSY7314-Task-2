@@ -7,16 +7,20 @@ const PaymentSchema = new mongoose.Schema(
 
     // Payment details
     amount: { type: Number, required: true, min: 0.01 },
-    currency: { type: String, required: true, uppercase: true }, // e.g., "ZAR"
-    provider: { type: String, required: true },                   // e.g., "ABSA"
-    swiftCode: { type: String, required: true },                 // e.g., AAAA-BB-CC-123
+    currency: { type: String, required: true, uppercase: true },
+    provider: { type: String, required: true }, 
+    swiftCode: { type: String, required: true }, 
 
     // Card storage (encrypted/sanitized)
     cardBrand: { type: String, enum: ["VISA", "MASTERCARD", "AMEX", "UNKNOWN"], default: "UNKNOWN" },
-    cardLast4: { type: String, required: true },  // remove minlength/maxlength for encryption
-    cardToken: { type: String },                  // reference to tokenized PAN (never raw card data)
-    expiryMonth: { type: Number, min: 1, max: 12 },
-    expiryYear: { type: Number, min: 2024, max: 2100 },
+    cardNumber: { type: String, required: false },
+    cardLast4: { type: String, required: true }, 
+    cardHolderName: { type: String, required: false, maxlength: 255 },
+    cardToken: { type: String, required: true }, 
+    expiryMonth: { type: Number, required: true, min: 1, max: 12 },
+    expiryYear: { type: Number, required: true, min: 2024, max: 2100 },
+
+    stripeId: { type: String, required: true },
 
     // Lifecycle / state
     status: {

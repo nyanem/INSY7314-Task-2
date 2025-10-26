@@ -1,12 +1,56 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
+import axios from "axios";
 
 const Dashboard = () => {
+  const [customerName, setCustomerName] = useState("Customer");
+  const [recentPayments, setRecentPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch customer details and recently added payments on mount
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("User not authenticated");
+
+        // Fetch customer details
+        const userRes = await axios.get("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCustomerName(userRes.data.fullName || "Customer");
+
+        // Fetch recent payments
+        const paymentsRes = await axios.get("/api/payments/myPayments", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const payments = paymentsRes.data || [];
+        const latestPayments = payments
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 3);
+        setRecentPayments(latestPayments);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Unable to load dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) return <p style={{ textAlign: "center" }}>Loading dashboard...</p>;
+  if (error) return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;
+
   return (
     <div>
       <Navbar isLoggedIn={true} />
       <div style={styles.container}>
-        <h2 style={styles.greeting}>Welcome to Our Bank. Hi, Samantha Jones. Welcome Back!</h2>
+        <h2 style={styles.greeting}>Hi, {customerName}! Welcome Back.</h2>
 
         {/* Top Sections Container */}
         <div style={styles.topSections}>
@@ -22,7 +66,6 @@ const Dashboard = () => {
               <button style={styles.addCardButton}>Add Debit Card</button>
             </div>
           </div>
-          
 
           {/* Balance Section */}
           <div style={styles.balanceContainer}>
@@ -30,8 +73,12 @@ const Dashboard = () => {
             <p style={styles.balance}>R 80 000,00</p>
             <p style={styles.timestamp}>As of 29 August 2025, 5:05 PM</p>
             <div style={styles.actions}>
-              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentForm"}>Make Payment</button>
-              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentHistory"}>View Payment History</button>
+              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentForm"}>
+                Make Payment
+              </button>
+              <button style={styles.actionButton} onClick={() => window.location.href = "/paymentHistory"}>
+                View Payment History
+              </button>
             </div>
           </div>
         </div>
@@ -42,31 +89,45 @@ const Dashboard = () => {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Transaction ID</th>
-                <th style={styles.th}>By</th>
+                <th style={styles.th}>Ref No.</th>
+                <th style={styles.th}>Amount</th>
+                <th style={styles.th}>Currency</th>
+                <th style={styles.th}>Provider</th>
                 <th style={styles.th}>Date</th>
                 <th style={styles.th}>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td style={styles.td}>#108884</td>
-                <td style={styles.td}>Johnathan Jones</td>
-                <td style={styles.td}>29 August 2025</td>
-                <td style={styles.td}>Pending</td>
-              </tr>
-              <tr>
-                <td style={styles.td}>#108883</td>
-                <td style={styles.td}>Johnathan Jones</td>
-                <td style={styles.td}>29 August 2025</td>
-                <td style={styles.td}>Completed</td>
-              </tr>
-              <tr>
-                <td style={styles.td}>#108882</td>
-                <td style={styles.td}>Johnathan Jones</td>
-                <td style={styles.td}>29 August 2025</td>
-                <td style={styles.td}>Rejected</td>
-              </tr>
+              {recentPayments.length > 0 ? (
+                recentPayments.map((payment, index) => {
+                  const shortRef = payment.paymentId.slice(0, 8); // short ref
+                  return (
+                    <tr key={index}>
+                      <td style={styles.td}>{shortRef}</td>
+                      <td style={styles.td}>R {payment.amount.toFixed(2)}</td>
+                      <td style={styles.td}>{payment.currency}</td>
+                      <td style={styles.td}>{payment.provider}</td>
+                      <td style={styles.td}>{new Date(payment.createdAt).toLocaleDateString()}</td>
+                      <td style={styles.td}>
+                        <span style={{
+                          ...styles.statusBadge,
+                          ...(payment.status.toLowerCase() === "pending" ? styles.pendingBadge : {}),
+                          ...(payment.status.toLowerCase() === "accepted" ? styles.acceptedBadge : {}),
+                          ...(payment.status.toLowerCase() === "rejected" ? styles.rejectedBadge : {}),
+                        }}>
+                          {payment.status.toLowerCase()}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>
+                    No Payments Yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -144,8 +205,8 @@ const styles = {
     background: "#004aad",
     color: "#fff",
     textDecoration: "none",
-    borderRadius: "25px", // more rounded corners
-    transition: "all 0.3s ease", // subtle shadow
+    borderRadius: "25px",
+    transition: "all 0.3s ease",
     fontWeight: "bold",
   },
   balance: {
@@ -169,8 +230,8 @@ const styles = {
     background: "#004aad",
     color: "#fff",
     textDecoration: "none",
-    borderRadius: "25px", // more rounded corners
-    transition: "all 0.3s ease", // subtle shadow
+    borderRadius: "25px",
+    transition: "all 0.3s ease",
     fontWeight: "bold",
   },
   paymentsContainer: {

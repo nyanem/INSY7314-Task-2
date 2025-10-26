@@ -28,7 +28,6 @@ const Register = () => {
     setSuccess("");
 
     try {
-      // Make sure your backend is running on this URL
       const res = await axios.post("https://localhost:5000/api/auth/register", formData, {
         withCredentials: true,
       });

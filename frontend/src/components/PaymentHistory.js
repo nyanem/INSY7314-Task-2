@@ -1,36 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import Navbar from "./Navbar";
+import axios from "axios";
 
 const PaymentHistory = () => {
+  
+  const [transactions, setTransactions] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [dateFilter, setDateFilter] = useState(null); // Add date filter state
-  const [showDateOptions, setShowDateOptions] = useState(false); // For dropdown
-  
-  // Sample data - in a real app, this would come from an API
-  const transactions = [
-    { id: "#101884", name: "Johnathan Jones", date: "29 August 2025", amount: "R 5000.00", status: "pending" },
-    { id: "#101884", name: "Johnathan Jones", date: "29 August 2025", amount: "R 5000.00", status: "accepted" },
-    { id: "#101884", name: "Johnathan Jones", date: "28 August 2025", amount: "R 5000.00", status: "rejected" },
-    { id: "#101884", name: "Johnathan Jones", date: "27 August 2025", amount: "R 5000.00", status: "accepted" },
-    { id: "#101884", name: "Johnathan Jones", date: "25 August 2025", amount: "R 5000.00", status: "accepted" },
-    { id: "#101884", name: "Johnathan Jones", date: "20 August 2025", amount: "R 5000.00", status: "accepted" },
-    { id: "#101884", name: "Johnathan Jones", date: "15 August 2025", amount: "R 5000.00", status: "accepted" }
-  ];
+  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [dateFilter, setDateFilter] = useState(null);
+  const [showDateOptions, setShowDateOptions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Date filter helper functions
-  const getDateFromString = (dateString) => {
-    // Parse date string to Date object
-    const dateParts = dateString.split(' ');
-    const day = parseInt(dateParts[0]);
-    const month = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"].indexOf(dateParts[1].toLowerCase());
-    const year = parseInt(dateParts[2]);
-    return new Date(year, month, day);
-  };
+  // Fetch payment history on component mount
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token"); 
+        const res = await axios.get("/api/payments/myPayments", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setTransactions(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch payments:", err);
+        setError("Unable to load payment history.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, []);
 
   const isWithinLastDays = (dateString, days) => {
+    const transactionDate = new Date(dateString); 
     const today = new Date();
-    const transactionDate = getDateFromString(dateString);
     const diffTime = Math.abs(today - transactionDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     return diffDays <= days;
@@ -38,7 +45,7 @@ const PaymentHistory = () => {
 
   // Apply both status and date filters
   const applyFilters = () => {
-    let filtered = transactions;
+    let filtered = [...transactions];
     
     // Apply status filter
     if (activeFilter !== "All") {
@@ -47,13 +54,7 @@ const PaymentHistory = () => {
     
     // Apply date filter if active
     if (dateFilter) {
-      if (dateFilter === 7) {
-        filtered = filtered.filter(t => isWithinLastDays(t.date, 7));
-      } else if (dateFilter === 30) {
-        filtered = filtered.filter(t => isWithinLastDays(t.date, 30));
-      } else if (dateFilter === 90) {
-        filtered = filtered.filter(t => isWithinLastDays(t.date, 90));
-      }
+      filtered = filtered.filter((t) => isWithinLastDays(t.createdAt, dateFilter));
     }
     
     return filtered;
@@ -61,15 +62,37 @@ const PaymentHistory = () => {
 
   const filteredTransactions = applyFilters();
 
+  const indexOfLast = currentPage * rowsPerPage;
+  const indexOfFirst = indexOfLast - rowsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, "...", totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  };
+
   // Handle date filter selection
   const handleDateFilter = (days) => {
     setDateFilter(days);
     setShowDateOptions(false);
+    setCurrentPage(1);
   };
 
   // Get status badge styling based on status
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch(status.toLowerCase()) {
       case "pending":
         return { ...styles.statusBadge, ...styles.pendingBadge };
       case "accepted":
@@ -86,8 +109,6 @@ const PaymentHistory = () => {
     setCurrentPage(page);
   };
 
-  const pageNumbers = [1, 2, 3, 4, "...", 10, 11];
-
   // Get date filter button text
   const getDateFilterText = () => {
     if (!dateFilter) return "Filter by date";
@@ -97,111 +118,113 @@ const PaymentHistory = () => {
     return "Filter by date";
   };
 
+  if (loading) return <p style={{ textAlign: "center" }}>Loading payments...</p>;
+  if (error) return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;
+
   return (
     <div>
       <Navbar isLoggedIn={true} />
       <div style={styles.container}>
         <h2 style={styles.title}>Payment History</h2>
-        
+
         <div style={styles.filterContainer}>
           <div style={styles.filterTabs}>
             {["All", "Pending", "Accepted", "Rejected"].map(filter => (
-              <button 
+              <button
                 key={filter}
-                style={filter === activeFilter ? 
-                  {...styles.filterTab, ...styles.activeFilterTab} : 
-                  styles.filterTab
-                }
-                onClick={() => setActiveFilter(filter)}
+                style={filter === activeFilter ? {...styles.filterTab, ...styles.activeFilterTab} : styles.filterTab}
+                onClick={() => { setActiveFilter(filter); setCurrentPage(1); }}
               >
                 {filter}
               </button>
             ))}
           </div>
-          
+
           <div style={styles.dateFilterContainer}>
-            <button 
-              style={{
-                ...styles.dateFilterButton,
-                ...(dateFilter ? styles.activeDateFilter : {})
-              }}
+            <button
+              style={{...styles.dateFilterButton, ...(dateFilter ? styles.activeDateFilter : {})}}
               onClick={() => setShowDateOptions(!showDateOptions)}
             >
-              {getDateFilterText()} ▾
+              {dateFilter ? `Last ${dateFilter} Days` : "Filter by date"} ▾
             </button>
-            
+
             {showDateOptions && (
               <div style={styles.dateOptions}>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(7)}>
-                  Last 7 Days
-                </button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(30)}>
-                  Last 30 Days
-                </button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(90)}>
-                  Last 3 Months
-                </button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(null)}>
-                  Clear Filter
-                </button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(7)}>Last 7 Days</button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(30)}>Last 30 Days</button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(90)}>Last 3 Months</button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(null)}>Clear Filter</button>
               </div>
             )}
           </div>
         </div>
-        
+
         <div style={styles.tableContainer}>
           <table style={styles.table}>
             <thead>
               <tr>
                 <th style={styles.th}>Ref No.</th>
-                <th style={styles.th}>Full Name</th>
-                <th style={styles.th}>Date</th>
                 <th style={styles.th}>Amount</th>
+                <th style={styles.th}>Currency</th>
+                <th style={styles.th}>Provider</th>
+                <th style={styles.th}>Date</th>
                 <th style={styles.th}>Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((transaction, index) => (
-                <tr key={index}>
-                  <td style={styles.td}>{transaction.id}</td>
-                  <td style={styles.td}>{transaction.name}</td>
-                  <td style={styles.td}>{transaction.date}</td>
-                  <td style={styles.td}>{transaction.amount}</td>
-                  <td style={styles.td}>
-                    <span style={getStatusBadge(transaction.status)}>
-                      {transaction.status === "pending" && "⦿ pending"}
-                      {transaction.status === "accepted" && "✓ accepted"}
-                      {transaction.status === "rejected" && "✗ rejected"}
-                    </span>
-                  </td>
+              {currentTransactions.length > 0 ? currentTransactions.map((transaction, index) => {
+                const shortRef = transaction.paymentId.slice(0, 8); // short ref
+                return (
+                  <tr key={index}>
+                    <td style={styles.td}>{shortRef}</td>
+                    <td style={styles.td}>{transaction.amount.toFixed(2)}</td>
+                    <td style={styles.td}>{transaction.currency}</td>
+                    <td style={styles.td}>{transaction.provider}</td>
+                    <td style={styles.td}>{new Date(transaction.createdAt).toLocaleDateString()}</td>
+                    <td style={styles.td}>
+                      <span style={getStatusBadge(transaction.status)}>
+                        {transaction.status.toLowerCase()}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>No transactions found.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-        
+
+        {/* Pagination */}
         <div style={styles.pagination}>
-          <button style={styles.paginationButton} onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}>
+          <button
+            style={styles.paginationButton}
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          >
             &lt; Previous
           </button>
-          
+
           <div style={styles.pageNumbers}>
-            {pageNumbers.map((page, index) => (
-              <button 
+            {getPageNumbers().map((page, index) => (
+              <button
                 key={index}
-                style={page === currentPage ? 
-                  {...styles.pageNumberButton, ...styles.activePageButton} : 
-                  styles.pageNumberButton
-                }
-                onClick={() => typeof page === 'number' && handlePageChange(page)}
-                disabled={typeof page !== 'number'}
+                style={page === currentPage ? {...styles.pageNumberButton, ...styles.activePageButton} : styles.pageNumberButton}
+                onClick={() => typeof page === "number" && setCurrentPage(page)}
+                disabled={typeof page !== "number"}
               >
                 {page}
               </button>
             ))}
           </div>
-          
-          <button style={styles.paginationButton} onClick={() => setCurrentPage(currentPage + 1)}>
+
+          <button
+            style={styles.paginationButton}
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+          >
             Next &gt;
           </button>
         </div>
