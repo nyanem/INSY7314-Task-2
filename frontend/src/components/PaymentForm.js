@@ -327,7 +327,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                     name="swiftCode"
                     value={form.swiftCode}
                     onChange={handleChange}
-                    placeholder="e.g AAAA-BB-CC-123"
+                    placeholder="e.g AAAABBCC123 or AAAA BB CC 123"
                     style={{ ...styles.inputFull, background: "#f9f9fb", color: "#301b5b" }}
                   />
                 </div>

@@ -178,7 +178,7 @@ export const loginEmployee = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Fetch all employees 
+    // Fetch all employees
     const employees = await Employee.find({});
     let matchedEmployee = null;
 
@@ -202,6 +202,13 @@ export const loginEmployee = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: matchedEmployee._id, role: matchedEmployee.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '2h' }
+    );
+
     console.log(`Login successful for: ${email}`);
     res.status(200).json({
       message: 'Login successful',
@@ -211,10 +218,12 @@ export const loginEmployee = async (req, res) => {
         email: decrypt(matchedEmployee.email),
         role: matchedEmployee.role,
       },
+      token,
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 //-------------------------------------------------------------------End of File----------------------------------------------------------//
