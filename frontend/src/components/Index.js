@@ -5,17 +5,16 @@ import logo from "../assets/logo.png"
 
 const Index = () => {
 
-  // eslint-disable-next-line no-unused-vars
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [landingData, setLandingData] = useState(null);
 
   useEffect(() => {
-    // fetch landing page data from backend
+
     const fetchLandingData = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/onboarding/start`, {
           method: "GET",
-          credentials: "include", // needed if you later want cookies (JWT) sent
+          credentials: "include",
         });
         const data = await response.json();
         setLandingData(data);
@@ -64,9 +63,9 @@ const styles = {
     background: "#004aad",
     color: "#fff",
     textDecoration: "none",
-    borderRadius: "25px", // more rounded corners
+    borderRadius: "25px",
     transition: "all 0.3s ease",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)", // subtle shadow
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.15)",
     fontWeight: "bold",
   },
 };

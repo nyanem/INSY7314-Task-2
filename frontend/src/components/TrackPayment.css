@@ -1,0 +1,163 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+.track-container {
+  padding: 40px;
+  background-color: #f4f6f8;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.page-title {
+  text-align: center;
+  color: #143664ff;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+/* Table styling */
+.table-container {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #143664ff;
+  color: #fff;
+  text-align: left;
+  padding: 12px;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Button */
+.verify-btn {
+  background-color: #004aad;
+  color: white;
+  padding: 6px 18px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.verify-btn:hover {
+  background-color: #143664ff;
+}
+
+/* Slide-out panel */
+.verify-panel {
+  position: fixed;
+  top: 0;
+  right: -480px;
+  width: 480px;
+  max-width: 90%;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: -6px 0 20px rgba(0, 0, 0, 0.15);
+  transition: right 0.45s cubic-bezier(.2,.9,.2,1);
+  padding: 28px 36px;
+  z-index: 1100;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.verify-panel.active {
+  right: 0;
+}
+
+.verify-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.verify-panel::-webkit-scrollbar-thumb {
+  background-color: rgba(20,54,100,0.25);
+  border-radius: 6px;
+}
+
+/* header + close button */
+.verify-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.verify-panel h3 {
+  color: #143664ff;
+  font-weight: 700;
+  margin: 0;
+  font-size: 22px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #143664ff;
+  line-height: 1;
+}
+
+/* Form */
+.verify-form label {
+  display: block;
+  font-weight: 700;
+  margin-top: 12px;
+  color: #143664ff;
+  font-size: 12px;
+}
+
+.verify-form input,
+.verify-form select,
+.verify-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #222;
+  background-color: #f8f8f8;
+}
+
+.verify-form textarea {
+  height: 90px;
+  resize: vertical;
+}
+
+.submit-btn {
+  margin-top: 18px;
+  background-color: #143664ff;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 24px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background-color .2s;
+}
+
+.submit-btn:hover {
+  background-color: #004aad;
+}

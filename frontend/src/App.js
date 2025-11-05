@@ -7,6 +7,8 @@ import Dashboard from "./components/Dashboard";
 import Register from "./components/Register";
 import PaymentForm from "./components/PaymentForm";
 import PaymentHistory from "./components/PaymentHistory";
+import TrackPayments from "./components/TrackPayments";
+
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/paymentForm" element={<PaymentForm />} />
         <Route path="/paymentHistory" element={<PaymentHistory />} />
+        <Route path="/track-payments" element={<TrackPayments />} />
 
       </Routes>
     </Router>

@@ -30,6 +30,11 @@ const PaymentSchema = new mongoose.Schema(
       index: true
     },
 
+    // Employee verification section
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+    verifiedAt: { type: Date },
+    swiftValidated: { type: Boolean, default: false },
+
     // Audit
     createdByIp: { type: String },
     userAgent: { type: String }

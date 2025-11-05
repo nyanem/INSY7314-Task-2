@@ -105,7 +105,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
       );
 
       console.log("Payment saved:", response.data);
-      goTo(3); // success step
+      goTo(3);
     } catch (err) {
       console.error("Payment error:", err);
       alert("There was an error processing your payment. Please try again.");
@@ -143,11 +143,11 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
         ))}
       </div>
 
-      {/* spacer to prevent the fixed stepper covering the card content; adjust height if needed */}
+      {}
       <div aria-hidden="true" style={{ height: 120 }} />
 
       <div style={{ ...styles.card, marginTop: 24 }}>
-        {/* heading centered; timer positioned to the right inside the card */}
+        {}
         <div style={{ position: "relative", paddingRight: 80, paddingBottom: 18 }}>
           <h3 style={styles.cardHeading}>{stepData.label}</h3>
           <div style={styles.timerWrapper}>
@@ -327,7 +327,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
                     name="swiftCode"
                     value={form.swiftCode}
                     onChange={handleChange}
-                    placeholder="e.g AAAA-BB-CC-123"
+                    placeholder="e.g AAAABBCC123 or AAAA BB CC 123"
                     style={{ ...styles.inputFull, background: "#f9f9fb", color: "#301b5b" }}
                   />
                 </div>

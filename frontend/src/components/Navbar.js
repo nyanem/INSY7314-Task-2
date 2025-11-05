@@ -1,6 +1,6 @@
  import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png"; // Make sure this exists (frontend/src/assets/logo.png)
+import logo from "../assets/logo.png";
 
 const Navbar = ({ isLoggedIn }) => {
   return (
