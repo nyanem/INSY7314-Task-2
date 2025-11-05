@@ -56,7 +56,7 @@ jobs:
           command: |
             npm install -g sonar-scanner
             sonar-scanner \
-              -Dsonar.projectKey="INSY7314-Task-2" \
+              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
               -Dsonar.organization="nyanem/INSYI7314-TASK-2" \
               -Dsonar.sources=./src \
               -Dsonar.host.url=https://sonarcloud.io \
