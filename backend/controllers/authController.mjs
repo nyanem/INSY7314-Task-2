@@ -7,6 +7,8 @@ import Employee, { employeeLoginSchema } from '../models/Employee.mjs';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { encrypt, decrypt, hmacHex } from '../utils/encryption.mjs';
+import bcrypt from 'bcrypt';
+
 
 // Register handler
 export const register = async (req, res) => {
@@ -76,7 +78,7 @@ export const register = async (req, res) => {
 };
 
 // Login handler with JWT token generation
-export const login = async (req, res) => {
+export const loginCustomer = async (req, res) => {
   // Validate input and authenticate user
   try {
     // Validate input before DB queries
@@ -176,54 +178,81 @@ export const getCurrentUser = async (req, res) => {
 
 export const loginEmployee = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Validate input
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    // Fetch all employees
-    const employees = await Employee.find({});
+    const { userName, password } = req.body;
+    if (!userName || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    // Defensive check for excessively long input
+    const maxFieldLength = 200;
+    for (const [key, value] of Object.entries({ userName, password })) {
+      if (typeof value === 'string' && value.length > maxFieldLength) {
+        return res.status(400).json({ message: `${key} too long` });
+      }
+    }
+
+    // Split username into first and last names
+    const nameParts = userName.trim().split(' ');
+    if (nameParts.length < 2) {
+      return res.status(400).json({ message: 'Please provide both first and last name in userName' });
+    }
+    const firstNameInput = nameParts[0].toLowerCase();
+    const lastNameInput = nameParts.slice(1).join(' ').toLowerCase();
+
+    // Fetch all employees once (can be optimized later)
+    const employees = await Employee.find({ role: 'employee' });
+
+    // Try to find the employee by decrypting first & last name
     let matchedEmployee = null;
-
     for (const emp of employees) {
-      const decryptedEmail = decrypt(emp.email);
-      if (decryptedEmail === email) {
+      const decryptedFirst = decrypt(emp.firstName).toLowerCase();
+      const decryptedLast = decrypt(emp.lastName).toLowerCase();
+
+      if (decryptedFirst === firstNameInput && decryptedLast === lastNameInput) {
         matchedEmployee = emp;
         break;
       }
     }
 
     if (!matchedEmployee) {
-      console.log(`Login failed: No employee found for email: ${email}`);
-      return res.status(401).json({ message: 'Invalid email or password' });
+      console.log(`Login failed: No employee found for username: ${userName}`);
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    // Compare hashed password
-    const isMatch = await matchedEmployee.comparePassword(password);
+    // Compare password
+    const isMatch = await bcrypt.compare(password, matchedEmployee.password);
     if (!isMatch) {
-      console.log(`Login failed: Password mismatch for email: ${email}`);
-      return res.status(401).json({ message: 'Invalid email or password' });
+      console.log(`Login failed: Password mismatch for username: ${userName}`);
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    // Generate JWT token
+    // Generate JWT
     const token = jwt.sign(
       { id: matchedEmployee._id, role: matchedEmployee.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '2h' }
     );
 
-    console.log(`Login successful for: ${email}`);
+    console.log(`Login successful for: ${userName}`);
     res.status(200).json({
       message: 'Login successful',
+      role: matchedEmployee.role, 
       employee: {
-        firstName: matchedEmployee.firstName,
-        lastName: matchedEmployee.lastName,
+        firstName: decrypt(matchedEmployee.firstName),
+        lastName: decrypt(matchedEmployee.lastName),
         email: decrypt(matchedEmployee.email),
         role: matchedEmployee.role,
       },
       token,
     });
-  } catch (error) {
-    console.error('Login error:', error);
+
+  } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

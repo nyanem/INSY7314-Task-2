@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { payments as initialPayments } from "../data/payments";
-import "./TrackPayments.css";
-import Navbar from "./Navbar"; // ✅ Fixed: component name must match import
+import { payments as initialPayments } from "../data/payment";
+import "./TrackPayment.css";
+import Navbar from "./Navbar";
 
 export default function TrackPayments() {
   const [payments, setPayments] = useState(initialPayments);
@@ -21,14 +21,14 @@ export default function TrackPayments() {
     if (!selectedPayment) return;
 
     alert(
-      `✅ Payment ${selectedPayment.paymentId} updated to "${selectedPayment.status}"\nComment: ${comment || "None"}`
+      `Payment ${selectedPayment.paymentId} updated to "${selectedPayment.status}"\nComment: ${comment || "None"}`
     );
     closePanel();
   };
 
   return (
     <div>
-      {/* ✅ Navbar must be inside ONE root div */}
+      {/* Navbar must be inside ONE root div */}
       <Navbar />
 
       <div className="track-container">
@@ -76,7 +76,7 @@ export default function TrackPayments() {
           </table>
         </div>
 
-        {/* ✅ Slide-Out Verify Panel */}
+        {/* Slide-Out Verify Panel */}
         {selectedPayment && (
           <div className="verify-panel active">
             <div className="verify-header">

@@ -17,16 +17,16 @@ const employeeSchema = new mongoose.Schema({
 
 // Pre-save hook: sanitize, encrypt email, hash password
 employeeSchema.pre('save', async function (next) {
+  // Sanitize names
   this.firstName = sanitizeString(this.firstName);
   this.lastName = sanitizeString(this.lastName);
 
-  // Encrypt email before saving
-  if (this.isModified('email')) {
-    const sanitizedEmail = sanitizeString(this.email.toLowerCase());
-    this.email = encrypt(sanitizedEmail);
-  }
+  // Encrypt sensitive fields
+  if (this.isModified('firstName')) this.firstName = encrypt(this.firstName);
+  if (this.isModified('lastName')) this.lastName = encrypt(this.lastName);
+  if (this.isModified('email')) this.email = encrypt(sanitizeString(this.email.toLowerCase()));
 
-  // Hash password only if modified
+  // Hash password if modified
   if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -34,6 +34,8 @@ employeeSchema.pre('save', async function (next) {
 
   next();
 });
+
+
 
 // Compare password method
 employeeSchema.methods.comparePassword = async function (plainPassword) {

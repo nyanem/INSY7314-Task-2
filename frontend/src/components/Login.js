@@ -19,33 +19,50 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    try {
-      const res = await axios.post(
-        "https://localhost:5000/api/auth/login", 
-        formData, 
-        { withCredentials: true }
-      );
+  try {
+    // Determine endpoint: employee if accountNumber is empty
+    const endpoint = formData.accountNumber
+      ? "/api/auth/login/customer"
+      : "/api/auth/login/employee";
 
-      if (res.status === 200) {
-        setSuccess(res.data.message || "Login successful!");
-        
-        localStorage.setItem("token", res.data.token);
+    // Only send accountNumber if it's a customer login
+    const payload = formData.accountNumber
+      ? formData
+      : { userName: formData.userName, password: formData.password };
 
-        setTimeout(() => navigate("/dashboard"), 1000);
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      if (err.response) {
-        setError(err.response.data.message || "Login failed");
-      } else {
-        setError("Could not connect to server");
-      }
+    const res = await axios.post(
+      `https://localhost:5000${endpoint}`,
+      payload,
+      { withCredentials: true }
+    );
+
+    if (res.status === 200) {
+      setSuccess(res.data.message || "Login successful!");
+      localStorage.setItem("token", res.data.token);
+
+      // Redirect based on role
+      const role = res.data.role; // backend must return role
+      setTimeout(() => {
+        if (role === "employee") {
+          navigate("/track-payments");
+        } else {
+          navigate("/dashboard");
+        }
+      }, 1000);
     }
-  };
+  } catch (err) {
+    console.error("Login error:", err);
+    if (err.response) {
+      setError(err.response.data.message || "Login failed");
+    } else {
+      setError("Could not connect to server");
+    }
+  }
+};
 
   return (
     <div>
@@ -63,7 +80,7 @@ const Login = () => {
                 type="text"
                 name="userName"
                 placeholder="Enter your username"
-                value={formData.username}
+                value={formData.userName}
                 onChange={handleChange}
                 style={styles.input}
                 required
@@ -71,16 +88,15 @@ const Login = () => {
               <input
                 type="text"
                 name="accountNumber"
-                placeholder="Enter your account number"
+                placeholder="Enter your account number (customers only)"
                 value={formData.accountNumber}
                 onChange={handleChange}
                 style={styles.input}
-                required
               />
               <input
                 type="password"
                 name="password"
-                placeholder="Enter your assword"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 style={styles.input}
@@ -89,12 +105,17 @@ const Login = () => {
             </div>
 
             <div style={styles.captchaBox}>
-              <p style={{ fontSize: "13px", color: "#888" }}>🧩 I'm not a robot (captcha placeholder)</p>
+              <p style={{ fontSize: "13px", color: "#888" }}>
+                🧩 I'm not a robot (captcha placeholder)
+              </p>
             </div>
 
             <button type="submit" style={styles.loginButton}>Login</button>
             <button type="button" style={styles.forgotButton}>Forgot password</button>
           </form>
+
+          {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+          {success && <p style={{ color: "green", marginTop: "10px" }}>{success}</p>}
         </div>
       </div>
     </div>

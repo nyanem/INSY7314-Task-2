@@ -13,18 +13,20 @@ const employees = [
 
 export const seedEmployees = async () => {
   try {
-    for (const emp of employees) {
-      // Encrypt email before checking existence
-      const encryptedEmail = encrypt(emp.email.toLowerCase());
-      const exists = await Employee.findOne({ email: encryptedEmail });
+    await Employee.deleteMany({});
+    console.log('Deleted all employees.');
 
-      if (!exists) {
-        // Triggers pre-save hook for encryption & hashing
-        await Employee.create(emp); 
-        console.log(`Seeded employee: ${emp.email}`);
-      } else {
-        console.log(`Employee already exists: ${emp.email}`);
-      }
+    for (const emp of employees) {
+      // Create new employee — pre-save hook handles encryption & hashing
+      await Employee.create({
+        firstName: emp.firstName,
+        lastName: emp.lastName,
+        email: emp.email.toLowerCase(),
+        password: emp.password,
+        role: emp.role,
+      });
+
+      console.log(`Seeded employee: ${emp.firstName} ${emp.lastName}`);
     }
 
     console.log('Employee seeding completed.');
@@ -33,4 +35,5 @@ export const seedEmployees = async () => {
   }
 };
 
+seedEmployees();
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

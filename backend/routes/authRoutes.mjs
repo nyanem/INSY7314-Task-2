@@ -3,7 +3,7 @@
 // Imports necessary for the Auth Route Setup
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, getCurrentUser, loginEmployee  } from '../controllers/authController.mjs';
+import { register, loginCustomer, getCurrentUser, loginEmployee  } from '../controllers/authController.mjs';
 import { authMiddleware } from '../middleware/secure.mjs';
 
 // Create router
@@ -68,7 +68,7 @@ router.post(
 
 // Login route using username
 router.post(
-  '/login',
+  '/login/customer',
   [
     body('userName')
       .notEmpty()
@@ -90,7 +90,7 @@ router.post(
       .matches(passwordRegex)
       .withMessage('Invalid password format.')
   ],
-  login
+  loginCustomer
 );
 
 router.get('/me', authMiddleware, getCurrentUser);
