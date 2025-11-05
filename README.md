@@ -2,6 +2,8 @@
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=your_project_key&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=your_project_key)
+
 This repository contains the **International Banking System** — a full-stack web application built using **React (frontend)**, **Node.js/Express (backend)**, and **MongoDB Atlas (cloud database)**.  
 
 The project implements onboarding and authentication functionalities, ensuring data security and modern web development best practices.
