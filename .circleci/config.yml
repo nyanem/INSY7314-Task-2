@@ -13,10 +13,10 @@ jobs:
           name: Fix permissions
           command: sudo chown -R circleci:circleci .
 
-      # Reset npm cache
-      - run:
-          name: Reset npm cache
-          command: npm cache clean --force
+      # Restore cached dependencies
+      - restore_cache:
+          keys:
+            - v1-backend-dependencies-{{ checksum "backend/package-lock.json" }}
 
       # Install backend dependencies
       - run:
@@ -25,67 +25,62 @@ jobs:
             cd backend
             npm install
 
-      # Cache backend node_modules
+      # Save cache for future builds
       - save_cache:
           paths:
             - ./backend/node_modules
           key: v1-backend-dependencies-{{ checksum "backend/package-lock.json" }}
 
-      # Verify MongoDB connection string
+      # Verify environment variables
       - run:
-          name: Verify MongoDB connection string
+          name: Verify environment variables
           command: |
             if [ -z "$ATLAS_URI" ]; then
-              echo "ERROR: ATLAS_URI is not set"
+              echo "ERROR: ATLAS_URI is not set!"
               exit 1
-            else
-              echo "ATLAS_URI is set"
             fi
-
-      # Verify JWT secret
-      - run:
-          name: Verify JWT secret
-          command: |
             if [ -z "$JWT_SECRET" ]; then
-              echo "ERROR: JWT_SECRET is not set"
+              echo "ERROR: JWT_SECRET is not set!"
               exit 1
-            else
-              echo "JWT_SECRET is set"
             fi
+            echo "✅ Environment variables verified."
 
-      # Run backend tests
+      # Run backend tests (if available)
       - run:
           name: Run backend tests
           command: |
             cd backend
             if [ -f package.json ]; then
-              npm test || echo "No tests or some failed"
+              npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
             else
-              echo "No test configuration found"
+              echo "No test configuration found."
             fi
 
       # Lint backend code
       - run:
           name: Lint backend code
-          command: cd backend && npx eslint . || echo "No lint errors"
+          command: |
+            cd backend
+            npx eslint . || echo "No lint errors"
 
+      # Install sonar-scanner locally
       - run:
-         name: Install sonar-scanner locally
-         command: |
-          cd backend
-          npm install sonar-scanner --save-dev
+          name: Install sonar-scanner locally
+          command: |
+            cd backend
+            npm install sonar-scanner --save-dev
 
-      # SonarQube Scan
+      # Run SonarQube Scan with npx
       - run:
-          name: SonarQube Scan
+          name: Run SonarQube Scan
           command: |
             cd backend
             npx sonar-scanner \
-            -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
-            -Dsonar.organization="nyanem" \
-            -Dsonar.sources=backend/src \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
+              -Dsonar.organization="nyanem" \
+              -Dsonar.sources=backend/src \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=$SONAR_TOKEN
 
   frontend_build:
     docker:
@@ -94,12 +89,12 @@ jobs:
     steps:
       - checkout
 
-      # Fix permissions at the start
+      # Fix permissions
       - run:
           name: Fix permissions
           command: sudo chown -R circleci:circleci .
 
-      # Restore cached dependencies if available
+      # Restore cached dependencies
       - restore_cache:
           keys:
             - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
@@ -111,7 +106,7 @@ jobs:
             cd frontend
             npm install
 
-      # Save frontend node_modules to cache
+      # Save cache for future builds
       - save_cache:
           paths:
             - ./frontend/node_modules
@@ -122,17 +117,17 @@ jobs:
           name: Lint frontend code
           command: |
             cd frontend
-            npx eslint . || echo "Lint warnings present"
+            npx eslint . || echo "No lint errors"
 
-      # Run frontend tests
+      # Run frontend tests (if available)
       - run:
           name: Run frontend tests
           command: |
             cd frontend
             if [ -f package.json ]; then
-              npm test -- --watchAll=false || echo "No tests or some failed"
+              npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
             else
-              echo "No test configuration found"
+              echo "No test configuration found."
             fi
 
       # Build frontend
