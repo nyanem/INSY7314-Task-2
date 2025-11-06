@@ -73,58 +73,58 @@ jobs:
            -Dsonar.host.url=https://sonarcloud.io \
            -Dsonar.login=$SONAR_TOKEN
 
- 
+
   frontend_build:
-  docker:
-    - image: cimg/node:20.5
-  working_directory: ~/repo
-  steps:
-    - checkout
+    docker:
+      - image: cimg/node:20.5
+    working_directory: ~/repo
+    steps:
+      - checkout
 
-    - run:
-        name: Fix permissions
-        command: sudo chown -R circleci:circleci .
+      - run:
+          name: Fix permissions
+          command: sudo chown -R circleci:circleci .
 
-    - run:
-        name: Clean npm cache
-        command: npm cache clean --force
+      - run:
+          name: Clean npm cache
+          command: npm cache clean --force
 
-    - restore_cache:
-        keys:
-          - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+      - restore_cache:
+          keys:
+            - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
 
-    - run:
-        name: Install frontend dependencies
-        command: |
-          cd frontend
-          sudo chown -R circleci:circleci .
-          rm -rf node_modules package-lock.json
-          npm install --legacy-peer-deps
+      - run:
+          name: Install frontend dependencies
+          command: |
+            cd frontend
+            sudo chown -R circleci:circleci .
+            rm -rf node_modules package-lock.json
+            npm install --legacy-peer-deps
 
-    - save_cache:
-        paths:
-          - ./frontend/node_modules
-        key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+      - save_cache:
+          paths:
+            - ./frontend/node_modules
+          key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
 
-    - run:
-        name: Lint frontend code
-        command: |
-          cd frontend
-          npx eslint . || echo "Lint warnings present"
+      - run:
+          name: Lint frontend code
+          command: |
+            cd frontend
+            npx eslint . || echo "Lint warnings present"
 
-    - run:
-        name: Run frontend tests
-        command: |
-          cd frontend
-          if [ -f package.json ]; then
-            npm test -- --watchAll=false || echo "No tests or some failed — please review."
-          else
-            echo "No test configuration found."
-          fi
+      - run:
+          name: Run frontend tests
+          command: |
+            cd frontend
+            if [ -f package.json ]; then
+              npm test -- --watchAll=false || echo "No tests or some failed — please review."
+            else
+              echo "No test configuration found."
+            fi
 
-    - run:
-        name: Build frontend
-        command: |
-          cd frontend
-          chmod -R 755 node_modules
-          npm run build
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
+            chmod -R 755 node_modules
+            npm run build
