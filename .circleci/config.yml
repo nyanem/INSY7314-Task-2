@@ -69,17 +69,23 @@ jobs:
           name: Lint backend code
           command: cd backend && npx eslint . || echo "No lint errors"
 
+      - run:
+         name: Install sonar-scanner locally
+         command: |
+          cd backend
+          npm install sonar-scanner --save-dev
+
       # SonarQube Scan
       - run:
           name: SonarQube Scan
           command: |
-            npm install -g sonar-scanner
-            sonar-scanner \
-              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
-              -Dsonar.organization="nyanem" \
-              -Dsonar.sources=backend/src \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.login=$SONAR_TOKEN
+            cd backend
+            npx sonar-scanner \
+            -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
+            -Dsonar.organization="nyanem" \
+            -Dsonar.sources=backend/src \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
 
   frontend_build:
     docker:
