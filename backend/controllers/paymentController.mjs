@@ -2,6 +2,7 @@ import { paymentCreateSchema } from "../validation/paymentSchema.mjs";
 import { v4 as uuid } from "uuid";
 import { encrypt, decrypt } from "../utils/encryption.mjs";
 import Payment from '../models/Payment.mjs';
+import Customer from '../models/Customer.mjs';
 
 /**
  * POST /api/payments/createPayment
@@ -9,16 +10,24 @@ import Payment from '../models/Payment.mjs';
  */
 export const createPayment = async (req, res, next) => {
   try {
-    // Validate input
     const parsed = paymentCreateSchema.parse(req.body);
 
     // Get customerId from JWT
     const customerId = req.user.id;
 
+    // Fetch customer name
+    const customer = await Customer.findById(customerId);
+    if (!customer) return res.status(404).json({ message: "Customer not found" });
+
+    const firstNameEncrypted = customer.firstName;
+    const lastNameEncrypted = customer.lastName;
+
     const internalPaymentId = uuid();
 
     const doc = await Payment.create({
       customerId: encrypt(customerId),
+      customerFirstName: firstNameEncrypted,
+      customerLastName: lastNameEncrypted,
       amount: parsed.amount,
       currency: parsed.currency,
       provider: encrypt(parsed.provider),
@@ -36,10 +45,10 @@ export const createPayment = async (req, res, next) => {
       userAgent: req.get('user-agent'),
     });
 
-    // Return safe details to frontend
     res.status(201).json({
       id: doc._id,
       customerId,
+      customerName: `${decrypt(firstNameEncrypted)} ${decrypt(lastNameEncrypted)}`,
       amount: doc.amount,
       currency: doc.currency,
       provider: parsed.provider,
@@ -64,12 +73,12 @@ export const createPayment = async (req, res, next) => {
  */
 export const getAllPayments = async (req, res, next) => {
   try {
-
     const payments = await Payment.find().sort({ createdAt: -1 }).lean();
 
     const safePayments = payments.map((p) => ({
       id: p._id,
       customerId: decrypt(p.customerId),
+      customerName: `${decrypt(p.customerFirstName)} ${decrypt(p.customerLastName)}`,
       amount: p.amount,
       currency: p.currency,
       provider: decrypt(p.provider),
@@ -96,16 +105,14 @@ export const getAllPayments = async (req, res, next) => {
  */
 export const getPaymentById = async (req, res, next) => {
   try {
-
     const { id } = req.params;
-
-    // Fetch payment from Database
     const doc = await Payment.findById(id).lean();
     if (!doc) return res.status(404).json({ error: 'Payment not found' });
 
     res.json({
       id: doc._id,
       customerId: decrypt(doc.customerId),
+      customerName: `${decrypt(doc.customerFirstName)} ${decrypt(doc.customerLastName)}`,
       amount: doc.amount,
       currency: doc.currency,
       provider: decrypt(doc.provider),
@@ -124,42 +131,40 @@ export const getPaymentById = async (req, res, next) => {
   }
 };
 
+
 /**
  * GET /api/payments/myPayments
  * Get all payments for the currently logged-in customer - Customer View
  */
 export const getPaymentsByCustomer = async (req, res, next) => {
   try {
-    // Fetch all payments
     const payments = await Payment.find().sort({ createdAt: -1 }).lean();
 
     const customerPayments = payments.filter(p => decrypt(p.customerId) === req.user.id);
 
-    const safePayments = customerPayments.map(p => {
-      // Create a short reference from the stripeId
-      const shortRef = p.stripeId.slice(0, 8);
-        return {
-          id: p._id,
-          amount: p.amount,
-          currency: p.currency,
-          provider: decrypt(p.provider),
-          swiftCode: decrypt(p.swiftCode),
-          cardBrand: p.cardBrand,
-          cardLast4: decrypt(p.cardLast4),
-          expiryMonth: p.expiryMonth,
-          expiryYear: p.expiryYear,
-          status: p.status,
-          paymentId: shortRef,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt,
-        };
-    });
+    const safePayments = customerPayments.map(p => ({
+      id: p._id,
+      customerId: decrypt(p.customerId),
+      customerName: `${decrypt(p.customerFirstName)} ${decrypt(p.customerLastName)}`,
+      amount: p.amount,
+      currency: p.currency,
+      provider: decrypt(p.provider),
+      swiftCode: decrypt(p.swiftCode),
+      cardBrand: p.cardBrand,
+      cardLast4: decrypt(p.cardLast4),
+      expiryMonth: p.expiryMonth,
+      expiryYear: p.expiryYear,
+      status: p.status,
+      paymentId: p.stripeId.slice(0, 8),
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    }));
 
-    // Return to frontend
     res.json(safePayments);
-    } catch (err) {
-      console.error("Error fetching customer payments:", err);
-      next(err);
-    }
+  } catch (err) {
+    console.error("Error fetching customer payments:", err);
+    next(err);
+  }
 };
+
 //-------------------------------------------------------------------End of File----------------------------------------------------------//

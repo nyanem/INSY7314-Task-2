@@ -41,19 +41,26 @@ const Login = () => {
     );
 
     if (res.status === 200) {
-      setSuccess(res.data.message || "Login successful!");
-      localStorage.setItem("token", res.data.token);
+  setSuccess(res.data.message || "Login successful!");
 
-      // Redirect based on role
-      const role = res.data.role; // backend must return role
-      setTimeout(() => {
-        if (role === "employee") {
-          navigate("/track-payments");
-        } else {
-          navigate("/dashboard");
-        }
-      }, 1000);
+  // Store based on role
+  if (res.data.role === "employee") {
+    localStorage.setItem("employeeToken", res.data.token);
+  } else {
+    localStorage.setItem("customerToken", res.data.token);
+  }
+
+  // Redirect based on role
+  const role = res.data.role;
+  setTimeout(() => {
+    if (role === "employee") {
+      navigate("/trackPayments");
+    } else {
+      navigate("/dashboard");
     }
+  }, 1000);
+}
+
   } catch (err) {
     console.error("Login error:", err);
     if (err.response) {

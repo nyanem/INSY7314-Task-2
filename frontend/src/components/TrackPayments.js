@@ -1,65 +1,151 @@
-import React, { useState } from "react";
-import { payments as initialPayments } from "../data/payment";
+import React, { useState, useEffect } from "react";
 import "./TrackPayment.css";
 import Navbar from "./Navbar";
+import axios from "axios";
 
 export default function TrackPayments() {
-  const [payments, setPayments] = useState(initialPayments);
+  const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [comment, setComment] = useState("");
   const [swiftCode, setSwiftCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const openPanel = (payment) => setSelectedPayment(payment);
+  const API_BASE = "/api/employees";
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const token = localStorage.getItem("employeeToken");
+        if (!token) {
+          setError("No employee token found. Please log in.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE}/pendingPayments`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = Array.isArray(response.data) ? response.data : response.data.items || [];
+        const normalized = data.map((p) => ({
+          ...p,
+          status: p.status || "PENDING",
+          id: String(p.id || p._id),
+        }));
+
+        setPayments(normalized);
+      } catch (err) {
+        console.error("Error fetching payments:", err);
+        const serverMsg = err.response?.data?.message || err.response?.data || err.message;
+        setError(typeof serverMsg === "string" ? serverMsg : "Failed to load payments.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, []);
+
+  // Open side panel & populate SWIFT code
+  const openPanel = (payment) => {
+    setSelectedPayment({ ...payment });
+    setSwiftCode(payment.swiftCode || "");
+    setComment(""); 
+  };
 
   const closePanel = () => {
     setSelectedPayment(null);
-    setComment("");
     setSwiftCode("");
+    setComment("");
   };
 
-  const handleSubmit = () => {
+  const mapStatusToAction = (status) => {
+    if (!status) return null;
+    const s = String(status).toUpperCase();
+    if (s === "ACCEPTED" || s === "ACCEPT") return "ACCEPT";
+    if (s === "REJECTED" || s === "REJECT") return "REJECT";
+    return null;
+  };
+
+  const handleSubmit = async () => {
     if (!selectedPayment) return;
 
-    alert(
-      `Payment ${selectedPayment.paymentId} updated to "${selectedPayment.status}"\nComment: ${comment || "None"}`
-    );
-    closePanel();
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("employeeToken");
+      if (!token) throw new Error("Missing employee token.");
+
+      const action = mapStatusToAction(selectedPayment.status);
+      if (!action) {
+        alert("Please select Accepted or Rejected as the status.");
+        setLoading(false);
+        return;
+      }
+
+      const sanitizedSwift = swiftCode ? swiftCode.replace(/-/g, "").toUpperCase() : "";
+
+      const response = await axios.post(
+        `${API_BASE}/verifyPayment`,
+        {
+          paymentId: selectedPayment.id,
+          action,
+          swiftCode: sanitizedSwift,
+          comment,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert(response.data?.message || "Payment processed.");
+      setPayments((prev) => prev.filter((p) => p.id !== selectedPayment.id));
+      closePanel();
+    } catch (err) {
+      console.error("Error verifying payment:", err);
+      const serverMsg = err.response?.data?.message || err.message || "Error verifying payment.";
+      alert(serverMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
-      {/* Navbar must be inside ONE root div */}
       <Navbar />
 
       <div className="track-container">
-        <h2 className="page-title">Track Payment</h2>
+        <h2 className="page-title">Track Payments</h2>
+
+        {error && <p className="error-text">{error}</p>}
+        {loading && <p className="loading-text">Loading...</p>}
 
         <div className="table-container">
           <table>
             <thead>
               <tr>
                 <th>Ref No.</th>
-                <th>Full Name</th>
+                <th>Customer</th>
                 <th>Date</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {payments.length > 0 ? (
                 payments.map((payment) => (
-                  <tr key={payment.paymentId}>
-                    <td>#{payment.paymentId.substring(0, 8)}</td>
-                    <td>{payment.fullName}</td>
+                  <tr key={payment.id}>
+                    <td>#{String(payment.id).substring(0, 8)}</td>
+                    <td>{payment.customerName || "Unknown Customer"}</td>
                     <td>{new Date(payment.createdAt).toLocaleDateString()}</td>
-                    <td>R {payment.amount.toFixed(2)}</td>
-                    <td>{payment.status}</td>
                     <td>
-                      <button
-                        className="verify-btn"
-                        onClick={() => openPanel(payment)}
-                      >
+                      {payment.currency} {Number(payment.amount).toFixed(2)}
+                    </td>
+                    <td>{payment.status || "PENDING"}</td>
+                    <td>
+                      <button className="verify-btn" onClick={() => openPanel(payment)}>
                         Verify
                       </button>
                     </td>
@@ -68,7 +154,7 @@ export default function TrackPayments() {
               ) : (
                 <tr>
                   <td colSpan="6" style={{ textAlign: "center" }}>
-                    No Payments Found.
+                    No Pending Payments Found.
                   </td>
                 </tr>
               )}
@@ -76,7 +162,6 @@ export default function TrackPayments() {
           </table>
         </div>
 
-        {/* Slide-Out Verify Panel */}
         {selectedPayment && (
           <div className="verify-panel active">
             <div className="verify-header">
@@ -94,60 +179,42 @@ export default function TrackPayments() {
               }}
             >
               <label>Reference Number</label>
-              <input
-                value={"#" + selectedPayment.paymentId.substring(0, 8)}
-                readOnly
-              />
+              <input value={"#" + String(selectedPayment.id).substring(0, 8)} readOnly />
 
-              <label>Full Name</label>
-              <input value={selectedPayment.fullName} readOnly />
+              <label>Customer Name</label>
+              <input value={selectedPayment.customerName} readOnly />
 
-              <label>Account Number</label>
-              <input value={selectedPayment.accountNumber} readOnly />
+              <label>Provider</label>
+              <input value={selectedPayment.provider || "N/A"} readOnly />
 
               <label>Date</label>
-              <input
-                value={new Date(selectedPayment.createdAt).toLocaleDateString()}
-                readOnly
-              />
+              <input value={new Date(selectedPayment.createdAt).toLocaleDateString()} readOnly />
 
               <label>Amount</label>
-              <input
-                value={`R ${selectedPayment.amount.toFixed(2)}`}
-                readOnly
-              />
+              <input value={`${selectedPayment.currency} ${Number(selectedPayment.amount).toFixed(2)}`} readOnly />
 
               <label>SWIFT Code</label>
               <input
-                placeholder="BKENG..."
+                placeholder="BKENGZA..."
                 value={swiftCode}
                 onChange={(e) => setSwiftCode(e.target.value)}
               />
 
               <label>Status</label>
               <select
-                value={selectedPayment.status}
-                onChange={(e) =>
-                  setSelectedPayment({
-                    ...selectedPayment,
-                    status: e.target.value,
-                  })
-                }
+                value={selectedPayment.status || "PENDING"}
+                onChange={(e) => setSelectedPayment({ ...selectedPayment, status: e.target.value })}
               >
-                <option>Pending</option>
-                <option>Accepted</option>
-                <option>Rejected</option>
+                <option value="PENDING">Pending</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
               </select>
 
               <label>Comment</label>
-              <textarea
-                placeholder="Add a comment..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+              <textarea placeholder="Add a comment..." value={comment} onChange={(e) => setComment(e.target.value)} />
 
-              <button type="submit" className="submit-btn">
-                Submit
+              <button type="submit" className="submit-btn" disabled={loading}>
+                {loading ? "Processing..." : "Submit"}
               </button>
             </form>
           </div>

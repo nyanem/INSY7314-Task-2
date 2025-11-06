@@ -57,8 +57,8 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
   const handleBack = () => goTo(currentStep - 1);
 
   const handleConfirm = async () => {
-    if (currentStep === 1) {
-      const required = [
+  if (currentStep === 1) {
+    const required = [
       "cardBrand",
       "cardNumber",
       "cardHolderName",
@@ -71,23 +71,29 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
       "swiftCode"
     ];
 
-      const missing = required.filter((k) => !form[k]);
-      if (missing.length) {
-        alert("Please complete all required fields.");
-        return;
-      }
-
-      const snapshot = { ...form, confirmedAt: new Date().toISOString() };
-      setSavedPayment(snapshot);
-      setPreview(snapshot);
-      goTo(2);
+    const missing = required.filter((k) => !form[k]);
+    if (missing.length) {
+      alert("Please complete all required fields.");
       return;
     }
 
-    if (currentStep === 2) {
-    try {
+    const snapshot = { ...form, confirmedAt: new Date().toISOString() };
+    setSavedPayment(snapshot);
+    setPreview(snapshot);
+    goTo(2);
+    return;
+  }
 
-      // build payload without storing sensitive info
+  if (currentStep === 2) {
+    try {
+      // Grab JWT token from localStorage (or sessionStorage)
+      const token = localStorage.getItem("customerToken");
+      if (!token) {
+        alert("You must be logged in to complete payment.");
+        return;
+      }
+
+      // Build payload without storing sensitive info
       const payload = {
         ...savedPayment,
         cardToken: "none",
@@ -97,11 +103,16 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
         savedAt: new Date().toISOString(),
       };
 
-      // send to backend
+      // Send to backend with Authorization header
       const response = await axios.post(
         "https://localhost:5000/api/payments/createPayment",
         payload,
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
       );
 
       console.log("Payment saved:", response.data);
@@ -111,7 +122,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
       alert("There was an error processing your payment. Please try again.");
     }
   }
-  };
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
