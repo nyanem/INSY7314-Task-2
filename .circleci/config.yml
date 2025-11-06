@@ -65,8 +65,7 @@ jobs:
 
       - run:
           name: Run SonarQube Scan
-          command: |
-           ./sonar-scanner/bin/sonar-scanner \
+          command: sonar-scanner \
            -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
            -Dsonar.organization="nyanem" \
            -Dsonar.sources=backend \
@@ -75,8 +74,6 @@ jobs:
 
 
   frontend_build:
-    docker:
-      - image: cimg/node:20.5
     working_directory: ~/repo
     steps:
       - checkout
