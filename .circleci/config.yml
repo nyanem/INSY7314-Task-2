@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  # ✅ BACKEND JOB (unchanged)
+
   backend_build:
     docker:
       - image: cimg/node:20.5
@@ -64,18 +64,16 @@ jobs:
           command: cd backend && npx eslint . || echo "No lint errors"
 
       - run:
-          name: SonarQube Scan
+          name: Run SonarQube Scan
           command: |
-            npm install -g sonar-scanner
-            sonar-scanner \
-              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
-              -Dsonar.organization="nyanem" \
-              -Dsonar.sources=backend \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.login=$SONAR_TOKEN
+           ./sonar-scanner/bin/sonar-scanner \
+           -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
+           -Dsonar.organization="nyanem" \
+           -Dsonar.sources=backend \
+           -Dsonar.host.url=https://sonarcloud.io \
+           -Dsonar.login=$SONAR_TOKEN
 
-
-  # 🧩 FRONTEND JOB (fixed and improved)
+ 
   frontend_build:
     docker:
       - image: cimg/node:20.5
@@ -99,6 +97,14 @@ jobs:
             - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
 
       # Install frontend dependencies safely
+
+      - run:
+        name: Build frontend
+        command: |
+         cd frontend
+         chmod -R 755 node_modules
+         npm run build
+
       - run:
           name: Install frontend dependencies
           command: |
