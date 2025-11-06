@@ -52,26 +52,19 @@ jobs:
             cd backend
             npx eslint . || echo "No lint errors"
 
-      # Install sonar-scanner
+      # Download and extract SonarScanner CLI instead of npm install
       - run:
-          name: Install sonar-scanner locally
+          name: Download SonarScanner CLI
           command: |
-            cd backend
-            npm install sonar-scanner --save-dev
+            curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+            unzip sonar-scanner.zip
+            mv sonar-scanner-* sonar-scanner
+            export PATH=$PATH:$(pwd)/sonar-scanner/bin
 
-      # Fix permissions for sonar-scanner binary
-      - run:
-          name: Fix sonar-scanner permissions
-          command: |
-            chmod +x ./backend/node_modules/sonar-scanner/bin/sonar-scanner
-            sudo chown circleci:circleci ./backend/node_modules/sonar-scanner/bin/sonar-scanner
-
-      # Run SonarQube Scan
       - run:
           name: Run SonarQube Scan
           command: |
-            cd backend
-            npx sonar-scanner \
+            ./sonar-scanner/bin/sonar-scanner \
               -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
               -Dsonar.organization="nyanem" \
               -Dsonar.sources=backend/src \
