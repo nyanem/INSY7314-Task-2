@@ -24,12 +24,12 @@ const Login = () => {
   setSuccess("");
 
   try {
-    // Determine endpoint: employee if accountNumber is empty
+
     const endpoint = formData.accountNumber
       ? "/api/auth/login/customer"
       : "/api/auth/login/employee";
 
-    // Only send accountNumber if it's a customer login
+  
     const payload = formData.accountNumber
       ? formData
       : { userName: formData.userName, password: formData.password };
@@ -43,14 +43,12 @@ const Login = () => {
     if (res.status === 200) {
   setSuccess(res.data.message || "Login successful!");
 
-  // Store based on role
   if (res.data.role === "employee") {
     localStorage.setItem("employeeToken", res.data.token);
   } else {
     localStorage.setItem("customerToken", res.data.token);
   }
 
-  // Redirect based on role
   const role = res.data.role;
   setTimeout(() => {
     if (role === "employee") {

@@ -3,7 +3,6 @@ import Navbar from "./Navbar";
 import axios from "axios";
 
 const PaymentHistory = () => {
-  
   const [transactions, setTransactions] = useState([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,19 +12,59 @@ const PaymentHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getAuthToken = () => {
+    return (
+      localStorage.getItem("customerToken") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("employeeToken") ||
+      null
+    );
+  };
+
   useEffect(() => {
     const fetchPayments = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token"); 
+        setError(null);
+
+        const token = getAuthToken();
+        if (!token) {
+          setError("Not authenticated — please log in.");
+          setLoading(false);
+          return;
+        }
+
         const res = await axios.get("/api/payments/myPayments", {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         });
-        
-        setTransactions(res.data || []);
+
+        let data = [];
+        if (Array.isArray(res.data)) {
+          data = res.data;
+        } else if (res.data && Array.isArray(res.data.items)) {
+          data = res.data.items;
+        } else if (res.data && typeof res.data === "object" && Object.keys(res.data).length) {
+
+          data = res.data.payments || res.data.items || [];
+        }
+
+        console.debug("PaymentHistory: fetched data", { status: res.status, data: data.slice ? data.slice(0,5) : data });
+
+        setTransactions(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Failed to fetch payments:", err);
-        setError("Unable to load payment history.");
+        console.error("Failed to fetch payments (PaymentHistory):", err);
+
+        const serverMsg =
+          err.response?.data?.message ||
+          err.response?.data ||
+          (err.response ? `HTTP ${err.response.status}` : err.message);
+
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setError("Not authorized. Please log in again.");
+        } else {
+          setError(serverMsg || "Unable to load payment history.");
+        }
       } finally {
         setLoading(false);
       }
@@ -35,34 +74,32 @@ const PaymentHistory = () => {
   }, []);
 
   const isWithinLastDays = (dateString, days) => {
-    const transactionDate = new Date(dateString); 
+    const transactionDate = new Date(dateString);
     const today = new Date();
     const diffTime = Math.abs(today - transactionDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays <= days;
   };
 
   const applyFilters = () => {
     let filtered = [...transactions];
-    
-    // Apply status filter
+
     if (activeFilter !== "All") {
-      filtered = filtered.filter(t => t.status.toLowerCase() === activeFilter.toLowerCase());
+      filtered = filtered.filter((t) => (t.status || "").toLowerCase() === activeFilter.toLowerCase());
     }
-    
+
     if (dateFilter) {
       filtered = filtered.filter((t) => isWithinLastDays(t.createdAt, dateFilter));
     }
-    
+
     return filtered;
   };
 
   const filteredTransactions = applyFilters();
-
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentTransactions = filteredTransactions.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / rowsPerPage));
 
   const getPageNumbers = () => {
     const pages = [];
@@ -72,7 +109,15 @@ const PaymentHistory = () => {
       if (currentPage <= 4) {
         pages.push(1, 2, 3, 4, 5, "...", totalPages);
       } else if (currentPage >= totalPages - 3) {
-        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          "...",
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
         pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
       }
@@ -87,7 +132,7 @@ const PaymentHistory = () => {
   };
 
   const getStatusBadge = (status) => {
-    switch(status.toLowerCase()) {
+    switch ((status || "").toLowerCase()) {
       case "pending":
         return { ...styles.statusBadge, ...styles.pendingBadge };
       case "accepted":
@@ -97,19 +142,6 @@ const PaymentHistory = () => {
       default:
         return styles.statusBadge;
     }
-  };
-
-  // Handle pagination
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const getDateFilterText = () => {
-    if (!dateFilter) return "Filter by date";
-    if (dateFilter === 7) return "Last 7 Days";
-    if (dateFilter === 30) return "Last 30 Days";
-    if (dateFilter === 90) return "Last 3 Months";
-    return "Filter by date";
   };
 
   if (loading) return <p style={{ textAlign: "center" }}>Loading payments...</p>;
@@ -123,11 +155,14 @@ const PaymentHistory = () => {
 
         <div style={styles.filterContainer}>
           <div style={styles.filterTabs}>
-            {["All", "Pending", "Accepted", "Rejected"].map(filter => (
+            {["All", "Pending", "Accepted", "Rejected"].map((filter) => (
               <button
                 key={filter}
-                style={filter === activeFilter ? {...styles.filterTab, ...styles.activeFilterTab} : styles.filterTab}
-                onClick={() => { setActiveFilter(filter); setCurrentPage(1); }}
+                style={filter === activeFilter ? { ...styles.filterTab, ...styles.activeFilterTab } : styles.filterTab}
+                onClick={() => {
+                  setActiveFilter(filter);
+                  setCurrentPage(1);
+                }}
               >
                 {filter}
               </button>
@@ -136,7 +171,7 @@ const PaymentHistory = () => {
 
           <div style={styles.dateFilterContainer}>
             <button
-              style={{...styles.dateFilterButton, ...(dateFilter ? styles.activeDateFilter : {})}}
+              style={{ ...styles.dateFilterButton, ...(dateFilter ? styles.activeDateFilter : {}) }}
               onClick={() => setShowDateOptions(!showDateOptions)}
             >
               {dateFilter ? `Last ${dateFilter} Days` : "Filter by date"} ▾
@@ -144,10 +179,18 @@ const PaymentHistory = () => {
 
             {showDateOptions && (
               <div style={styles.dateOptions}>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(7)}>Last 7 Days</button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(30)}>Last 30 Days</button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(90)}>Last 3 Months</button>
-                <button style={styles.dateOption} onClick={() => handleDateFilter(null)}>Clear Filter</button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(7)}>
+                  Last 7 Days
+                </button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(30)}>
+                  Last 30 Days
+                </button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(90)}>
+                  Last 3 Months
+                </button>
+                <button style={styles.dateOption} onClick={() => handleDateFilter(null)}>
+                  Clear Filter
+                </button>
               </div>
             )}
           </div>
@@ -166,25 +209,27 @@ const PaymentHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {currentTransactions.length > 0 ? currentTransactions.map((transaction, index) => {
-                const shortRef = transaction.paymentId.slice(0, 8);
-                return (
-                  <tr key={index}>
-                    <td style={styles.td}>{shortRef}</td>
-                    <td style={styles.td}>{transaction.amount.toFixed(2)}</td>
-                    <td style={styles.td}>{transaction.currency}</td>
-                    <td style={styles.td}>{transaction.provider}</td>
-                    <td style={styles.td}>{new Date(transaction.createdAt).toLocaleDateString()}</td>
-                    <td style={styles.td}>
-                      <span style={getStatusBadge(transaction.status)}>
-                        {transaction.status.toLowerCase()}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              }) : (
+              {currentTransactions.length > 0 ? (
+                currentTransactions.map((transaction, index) => {
+                  const shortRef = (transaction.paymentId || transaction.stripeId || "").slice(0, 8);
+                  return (
+                    <tr key={index}>
+                      <td style={styles.td}>{shortRef}</td>
+                      <td style={styles.td}>{Number(transaction.amount || 0).toFixed(2)}</td>
+                      <td style={styles.td}>{transaction.currency}</td>
+                      <td style={styles.td}>{transaction.provider}</td>
+                      <td style={styles.td}>{new Date(transaction.createdAt).toLocaleDateString()}</td>
+                      <td style={styles.td}>
+                        <span style={getStatusBadge(transaction.status)}>{(transaction.status || "").toLowerCase()}</span>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>No transactions found.</td>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>
+                    No transactions found.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -193,11 +238,7 @@ const PaymentHistory = () => {
 
         {/* Pagination */}
         <div style={styles.pagination}>
-          <button
-            style={styles.paginationButton}
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-          >
+          <button style={styles.paginationButton} onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>
             &lt; Previous
           </button>
 
@@ -205,7 +246,7 @@ const PaymentHistory = () => {
             {getPageNumbers().map((page, index) => (
               <button
                 key={index}
-                style={page === currentPage ? {...styles.pageNumberButton, ...styles.activePageButton} : styles.pageNumberButton}
+                style={page === currentPage ? { ...styles.pageNumberButton, ...styles.activePageButton } : styles.pageNumberButton}
                 onClick={() => typeof page === "number" && setCurrentPage(page)}
                 disabled={typeof page !== "number"}
               >

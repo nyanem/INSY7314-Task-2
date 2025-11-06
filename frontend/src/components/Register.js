@@ -171,7 +171,7 @@ const styles = {
     gap: "10px",
   },
   input: {
-    flex: 1, // each input takes 50% of the row
+    flex: 1, 
     padding: "12px 18px",
     borderRadius: "25px",
     border: "none",

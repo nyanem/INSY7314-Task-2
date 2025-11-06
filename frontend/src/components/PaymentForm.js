@@ -86,14 +86,13 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
 
   if (currentStep === 2) {
     try {
-      // Grab JWT token from localStorage (or sessionStorage)
+
       const token = localStorage.getItem("customerToken");
       if (!token) {
         alert("You must be logged in to complete payment.");
         return;
       }
 
-      // Build payload without storing sensitive info
       const payload = {
         ...savedPayment,
         cardToken: "none",
@@ -103,7 +102,6 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
         savedAt: new Date().toISOString(),
       };
 
-      // Send to backend with Authorization header
       const response = await axios.post(
         "https://localhost:5000/api/payments/createPayment",
         payload,
@@ -135,7 +133,7 @@ const PaymentStepper = ({ initialStep = 1, onStepChange, timeLimitSeconds = 300,
 
   return (
     <div>
-      {/* fixed stepper (stays visible when scrolling) */}
+      {}
       <div className="stepper" aria-label="payment stepper" style={styles.stepper}>
         <div style={styles.connector} />
         {steps.map((step) => (
@@ -524,7 +522,6 @@ export default function PaymentForm() {
   };
 
   const handleReset = () => {
-    // optional: remount stepper or reset timer
   };
 
   return (
@@ -532,7 +529,7 @@ export default function PaymentForm() {
       <Header />
 
       <main className="container">
-        {/* SessionTimeout moved inside the card and passed into stepper so it appears inline with the heading */}
+        {}
         <PaymentStepper
           key={resetKey}
           initialStep={1}
@@ -558,7 +555,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "8px 20px",
-    height: 80,            // increase so stacked circle+label is centered
+    height: 80,
     background: "transparent",
     pointerEvents: "none",
   },
@@ -566,7 +563,7 @@ const styles = {
     position: "absolute",
     left: "22%",
     right: "22%",
-    top: "40%",            // center line vertically in the stepper
+    top: "40%",  
     height: 2,
     background: "#e6e6ee",
     zIndex: 0,
@@ -580,7 +577,6 @@ const styles = {
     position: "relative",
     zIndex: 2,
     pointerEvents: "auto",
-    /* ensure the stack is vertically centered inside the taller stepper */
     justifyContent: "center",
   },
   lineCompleted: {
@@ -628,7 +624,7 @@ const styles = {
     textTransform: "capitalize",
     textAlign: "center",
     margin: 0,
-    marginBottom: 42,   // <-- add spacing under the heading
+    marginBottom: 42,
     fontSize: 20,
     color: "#301b5b",
     fontWeight: 700,
@@ -667,8 +663,7 @@ const styles = {
   /* rows and labels */
   row: {
     marginBottom: 12,
-    display: "grid",
-    gridTemplateColumns: "160px 1fr", // label column + input column
+    display: "grid",// label column + input column
     alignItems: "center",
     columnGap: 16,
   },
