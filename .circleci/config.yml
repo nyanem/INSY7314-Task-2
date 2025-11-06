@@ -72,11 +72,11 @@ jobs:
           name: Run SonarQube Scan
           command: |
             $(npm root -g)/sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
-            -Dsonar.organization="nyanem" \
-            -Dsonar.sources=backend \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
+              -Dsonar.organization="nyanem" \
+              -Dsonar.sources=backend \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=$SONAR_TOKEN
 
   frontend_build:
     working_directory: ~/repo
