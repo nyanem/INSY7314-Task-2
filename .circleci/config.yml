@@ -8,30 +8,25 @@ jobs:
     steps:
       - checkout
 
-      # Fix permissions at the start
       - run:
           name: Fix permissions
           command: sudo chown -R circleci:circleci .
 
-      # Restore cached dependencies
       - restore_cache:
           keys:
             - v1-backend-dependencies-{{ checksum "backend/package-lock.json" }}
 
-      # Install backend dependencies
       - run:
           name: Install backend dependencies
           command: |
             cd backend
             npm install
 
-      # Save cache for future builds
       - save_cache:
           paths:
             - ./backend/node_modules
           key: v1-backend-dependencies-{{ checksum "backend/package-lock.json" }}
 
-      # Verify environment variables
       - run:
           name: Verify environment variables
           command: |
@@ -45,32 +40,33 @@ jobs:
             fi
             echo "✅ Environment variables verified."
 
-      # Run backend tests (if available)
       - run:
           name: Run backend tests
           command: |
             cd backend
-            if [ -f package.json ]; then
-              npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
-            else
-              echo "No test configuration found."
-            fi
+            npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
 
-      # Lint backend code
       - run:
           name: Lint backend code
           command: |
             cd backend
             npx eslint . || echo "No lint errors"
 
-      # Install sonar-scanner locally
+      # Install sonar-scanner
       - run:
           name: Install sonar-scanner locally
           command: |
             cd backend
             npm install sonar-scanner --save-dev
 
-      # Run SonarQube Scan with npx
+      # Fix permissions for sonar-scanner binary
+      - run:
+          name: Fix sonar-scanner permissions
+          command: |
+            chmod +x ./backend/node_modules/sonar-scanner/bin/sonar-scanner
+            sudo chown circleci:circleci ./backend/node_modules/sonar-scanner/bin/sonar-scanner
+
+      # Run SonarQube Scan
       - run:
           name: Run SonarQube Scan
           command: |
@@ -88,49 +84,31 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-
-      # Fix permissions
       - run:
           name: Fix permissions
           command: sudo chown -R circleci:circleci .
-
-      # Restore cached dependencies
       - restore_cache:
           keys:
             - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
-
-      # Install frontend dependencies
       - run:
           name: Install frontend dependencies
           command: |
             cd frontend
             npm install
-
-      # Save cache for future builds
       - save_cache:
           paths:
             - ./frontend/node_modules
           key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
-
-      # Lint frontend code
       - run:
           name: Lint frontend code
           command: |
             cd frontend
             npx eslint . || echo "No lint errors"
-
-      # Run frontend tests (if available)
       - run:
           name: Run frontend tests
           command: |
             cd frontend
-            if [ -f package.json ]; then
-              npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
-            else
-              echo "No test configuration found."
-            fi
-
-      # Build frontend
+            npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
       - run:
           name: Build frontend
           command: |
