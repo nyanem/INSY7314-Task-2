@@ -7,7 +7,9 @@
   "scripts": {
     "build": "echo 'No build step needed for backend' && exit 0",
     "start": "node server.mjs",
-    "dev": "nodemon server.mjs"
+    "dev": "nodemon server.mjs",
+    "test": "jest",
+   "lint": "eslint ."
   },
   "keywords": [],
   "author": "",

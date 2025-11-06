@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "react-router": "^7.9.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0"
   }
 }
