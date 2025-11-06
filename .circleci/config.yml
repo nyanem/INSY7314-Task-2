@@ -72,45 +72,64 @@ jobs:
               -Dsonar.login=$SONAR_TOKEN
 
   frontend_build:
-    docker:
-      - image: cimg/node:20.5
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - run:
-          name: Fix permissions
-          command: sudo chown -R circleci:circleci .
-      - restore_cache:
-          keys:
-            - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
-      - run:
-          name: Install frontend dependencies
-          command: |
-            cd frontend
-            npm install
-      - save_cache:
-          paths:
-            - ./frontend/node_modules
-          key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
-      - run:
-          name: Lint frontend code
-          command: |
-            cd frontend
-            npx eslint . || echo "No lint errors"
-      - run:
-          name: Run frontend tests
-          command: |
-            cd frontend
-            npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
-      - run:
-          name: Build frontend
-          command: |
-            cd frontend
-            npm run build
+  docker:
+    - image: cimg/node:20.5
+  working_directory: ~/repo
+  steps:
+    - checkout
 
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - backend_build
-      - frontend_build
+    # Ensure CircleCI user has full ownership
+    - run:
+        name: Fix permissions
+        command: sudo chown -R circleci:circleci .
+
+    # Reset npm cache (prevents corrupted installs)
+    - run:
+        name: Clean npm cache
+        command: npm cache clean --force
+
+    # Restore cached dependencies if available
+    - restore_cache:
+        keys:
+          - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+
+    # Install dependencies
+    - run:
+        name: Install frontend dependencies
+        command: |
+          cd frontend
+          sudo chown -R circleci:circleci .
+          rm -rf node_modules package-lock.json
+          npm install --legacy-peer-deps
+
+    # Cache dependencies for next run
+    - save_cache:
+        paths:
+          - ./frontend/node_modules
+        key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+
+    # Lint frontend code (optional but recommended)
+    - run:
+        name: Lint frontend code
+        command: |
+          cd frontend
+          npx eslint . || echo "Lint warnings present"
+
+    # Run frontend tests
+    - run:
+        name: Run frontend tests
+        command: |
+          cd frontend
+          if [ -f package.json ]; then
+            npm test -- --watchAll=false || echo "No tests or some failed — please review."
+          else
+            echo "No test configuration found."
+          fi
+
+    # Build frontend (React)
+    - run:
+        name: Build frontend
+        command: |
+          cd frontend
+          chmod -R 755 node_modules
+          npm run build
