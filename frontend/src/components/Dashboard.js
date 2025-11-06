@@ -10,38 +10,41 @@ const Dashboard = () => {
 
   // Fetch customer details and recently added payments on mount
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("User not authenticated");
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // Use customer token specifically
+      const token = localStorage.getItem("customerToken");
+      if (!token) throw new Error("User not authenticated");
 
-        // Fetch customer details
-        const userRes = await axios.get("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCustomerName(userRes.data.fullName || "Customer");
+      // Fetch customer details
+      const userRes = await axios.get("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCustomerName(userRes.data.fullName || "Customer");
 
-        // Fetch recent payments
-        const paymentsRes = await axios.get("/api/payments/myPayments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      // Fetch recent payments
+      const paymentsRes = await axios.get("/api/payments/myPayments", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const payments = paymentsRes.data || [];
-        const latestPayments = payments
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          .slice(0, 3);
-        setRecentPayments(latestPayments);
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setError("Unable to load dashboard data.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      const payments = paymentsRes.data || [];
+      const latestPayments = payments
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 3);
+      setRecentPayments(latestPayments);
 
-    fetchDashboardData();
-  }, []);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("Unable to load dashboard data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
+
 
   if (loading) return <p style={{ textAlign: "center" }}>Loading dashboard...</p>;
   if (error) return <p style={{ textAlign: "center", color: "red" }}>{error}</p>;

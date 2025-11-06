@@ -35,10 +35,10 @@ const app = express();
 
 // Enable CORS only from your frontend origin
 app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || 'https://localhost:3000',
-  methods: ['GET','POST','PUT','DELETE'],
-  credentials: true
+  origin: [process.env.FRONTEND_ORIGIN, 'http://localhost:3000'],
+  credentials: true,
 }));
+
 
 // Parse incoming JSON
 app.use((req, res, next) => {

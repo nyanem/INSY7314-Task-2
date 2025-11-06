@@ -21,7 +21,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/paymentForm" element={<PaymentForm />} />
         <Route path="/paymentHistory" element={<PaymentHistory />} />
-        <Route path="/track-payments" element={<TrackPayments />} />
+        <Route path="/trackPayments" element={<TrackPayments />} />
 
       </Routes>
     </Router>
