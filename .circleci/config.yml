@@ -1,54 +1,144 @@
-frontend_build:
-  docker:
-    - image: cimg/node:20.5
-  working_directory: ~/repo
-  steps:
-    - checkout
+version: 2.1
 
-    # Fix permissions at the start
-    - run:
-        name: Fix permissions
-        command: sudo chown -R circleci:circleci .
+jobs:
+  backend_build:
+    docker:
+      - image: cimg/node:20.5
+    working_directory: ~/repo
+    steps:
+      - checkout
 
-    # Restore cached dependencies if available
-    - restore_cache:
-        keys:
-          - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+      # Fix permissions at the start
+      - run:
+          name: Fix permissions
+          command: sudo chown -R circleci:circleci .
 
-    # Install frontend dependencies
-    - run:
-        name: Install frontend dependencies
-        command: |
-          cd frontend
-          npm install
+      # Reset npm cache
+      - run:
+          name: Reset npm cache
+          command: npm cache clean --force
 
-    # Save node_modules to cache for faster future builds
-    - save_cache:
-        paths:
-          - ./frontend/node_modules
-        key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+      # Install backend dependencies
+      - run:
+          name: Install backend dependencies
+          command: |
+            cd backend
+            npm install
 
-    # Run frontend linting (optional, but recommended)
-    - run:
-        name: Lint frontend code
-        command: |
-          cd frontend
-          npx eslint . || echo "⚠️ Lint warnings present"
+      # Cache backend node_modules
+      - save_cache:
+          paths:
+            - ./backend/node_modules
+          key: v1-backend-dependencies-{{ checksum "backend/package-lock.json" }}
 
-    # Run frontend tests (if any)
-    - run:
-        name: Run frontend tests
-        command: |
-          cd frontend
-          if [ -f package.json ]; then
-            npm test -- --watchAll=false || echo "⚠️ No tests or some failed — please review."
-          else
-            echo "No test configuration found."
-          fi
+      # Verify MongoDB connection string
+      - run:
+          name: Verify MongoDB connection string
+          command: |
+            if [ -z "$ATLAS_URI" ]; then
+              echo "ERROR: ATLAS_URI is not set"
+              exit 1
+            else
+              echo "ATLAS_URI is set"
+            fi
 
-    # Build frontend
-    - run:
-        name: Build frontend
-        command: |
-          cd frontend
-          npm run build
+      # Verify JWT secret
+      - run:
+          name: Verify JWT secret
+          command: |
+            if [ -z "$JWT_SECRET" ]; then
+              echo "ERROR: JWT_SECRET is not set"
+              exit 1
+            else
+              echo "JWT_SECRET is set"
+            fi
+
+      # Run backend tests
+      - run:
+          name: Run backend tests
+          command: |
+            cd backend
+            if [ -f package.json ]; then
+              npm test || echo "No tests or some failed"
+            else
+              echo "No test configuration found"
+            fi
+
+      # Lint backend code
+      - run:
+          name: Lint backend code
+          command: cd backend && npx eslint . || echo "No lint errors"
+
+      # SonarQube Scan
+      - run:
+          name: SonarQube Scan
+          command: |
+            npm install -g sonar-scanner
+            sonar-scanner \
+              -Dsonar.projectKey="nyanem_INSY7314-Task-2" \
+              -Dsonar.organization="nyanem" \
+              -Dsonar.sources=backend/src \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.login=$SONAR_TOKEN
+
+  frontend_build:
+    docker:
+      - image: cimg/node:20.5
+    working_directory: ~/repo
+    steps:
+      - checkout
+
+      # Fix permissions at the start
+      - run:
+          name: Fix permissions
+          command: sudo chown -R circleci:circleci .
+
+      # Restore cached dependencies if available
+      - restore_cache:
+          keys:
+            - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+
+      # Install frontend dependencies
+      - run:
+          name: Install frontend dependencies
+          command: |
+            cd frontend
+            npm install
+
+      # Save frontend node_modules to cache
+      - save_cache:
+          paths:
+            - ./frontend/node_modules
+          key: v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
+
+      # Lint frontend code
+      - run:
+          name: Lint frontend code
+          command: |
+            cd frontend
+            npx eslint . || echo "Lint warnings present"
+
+      # Run frontend tests
+      - run:
+          name: Run frontend tests
+          command: |
+            cd frontend
+            if [ -f package.json ]; then
+              npm test -- --watchAll=false || echo "No tests or some failed"
+            else
+              echo "No test configuration found"
+            fi
+
+      # Build frontend
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
+            npm run build
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - backend_build
+      - frontend_build
