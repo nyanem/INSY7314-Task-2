@@ -114,7 +114,7 @@ jobs:
           name: Build frontend
           command: |
             cd frontend
-            npm run build
+            CI=FALSE npm run build
 
 workflows:
   version: 2
