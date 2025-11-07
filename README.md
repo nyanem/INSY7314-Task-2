@@ -1,6 +1,34 @@
 # INSY7314 Task 2 – International Payments Portal 
 
+**What it does:** Shows whether your code builds successfully
+**Purpose:** Runs automated tests and checks every time you push code
+**Status indicators:**
+Green "passing" = All tests pass, code is stable
+Red "failing" = Tests failed, needs fixing
+**Benefit:** Ensures code quality and catches bugs early
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
+
+**What it does:** Analyzes code quality and security
+**Checks for:**
+Bugs and defects
+Security vulnerabilities
+Code smells (maintainability issues)
+Technical debt
+Security hotspots
+**Status indicators:**
+"Passed" = Code meets quality standards
+"Failed" = Quality issues need attention
+**Benefit:** Maintains high code quality and security throughout development
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nyanem_INSY7314-Task-2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nyanem_INSY7314-Task-2)
+
+
 This repository contains the **International Banking System** — a secure, full-stack web application for international payment processing. Built using **React (frontend)**, **Node.js/Express (backend)**, and **MongoDB Atlas (cloud database)**, the system implements robust authentication, payment processing, and employee verification functionalities with enterprise-grade security measures.
+
+---
+
+## Demo Video
+
+Watch the full walkthrough: 
 
 ---
 
@@ -17,7 +45,7 @@ Ensure you have the following installed:
 
 ### **Step 1: Clone the Repository**
 ```bash
-git clone https://github.com/nyanem/INSY7314-Task-2.git
+git clone SIT IN GITHUB LINK
 cd INSY7314-Task-2
 ```
 
@@ -349,8 +377,5 @@ INSY7314-Task-2/
 
 ---
 
-## Demo Video
-
-Watch the full walkthrough: 
 
 ---
