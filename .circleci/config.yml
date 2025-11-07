@@ -86,10 +86,11 @@ jobs:
             - v1-frontend-dependencies-{{ checksum "frontend/package-lock.json" }}
 
       - run:
-          name: Install frontend dependencies
+          name: Install compatible dependencies
           command: |
             cd frontend
             rm -rf node_modules package-lock.json
+            npm install ajv@6 ajv-keywords@3 --save-dev
             npm install --legacy-peer-deps
 
       - save_cache:
