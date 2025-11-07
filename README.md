@@ -30,7 +30,7 @@ This repository contains the **International Banking System** — a secure, full
 
 ## Demo Video
 
-Watch the full walkthrough: 
+Watch the full walkthrough: https://youtu.be/NUCgc3c8dMw
 
 ---
 
