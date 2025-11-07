@@ -1,13 +1,13 @@
 # INSY7314 Task 2 – International Payments Portal 
 
-**What it does:** Shows whether your code builds successfully
-**Purpose:** Runs automated tests and checks every time you push code
-**Status indicators:**
-Green "passing" = All tests pass, code is stable
-Red "failing" = Tests failed, needs fixing
-**Benefit:** Ensures code quality and catches bugs early
+- **What it does:** Shows whether your code builds successfully
+- **Purpose:** Runs automated tests and checks every time you push code
+- **Status indicators:**
+  - Green "passing" = All tests pass, code is stable
+  - Red "failing" = Tests failed, needs fixing
+- **Benefit:** Ensures code quality and catches bugs early
 
-1. [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
+ [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
 
 **What it does:** Analyzes code quality and security
 **Checks for:**
