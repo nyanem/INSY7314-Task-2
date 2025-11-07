@@ -4,7 +4,7 @@ This repository contains the **International Banking System** — a secure, full
 
 ---
 
-## 🚀 How to Run the Website
+## How to Run the Website
 
 ### **Prerequisites**
 
@@ -53,7 +53,7 @@ The project requires SSL certificates for HTTPS. Place them in `backend/keys/`:
 npm start
 ```
 
-✅ **Success output:**
+ **Success output:**
 ```
 MongoDB connected
 Employee seeding completed.
@@ -77,11 +77,11 @@ npm install
 npm start
 ```
 
-✅ **Success:** Browser opens at `https://localhost:3000`
+ **Success:** Browser opens at `https://localhost:3000`
 
 ---
 
-## 🔐 Login Details
+## Login Details
 
 ### **Customer Account**
 To test the customer portal, register a new account through the registration page:
@@ -101,7 +101,7 @@ For employee portal access (payment verification):
 
 ---
 
-## ✨ Main Features
+## Main Features
 
 ### **1. Customer Portal**
 - **User Registration & Authentication**
@@ -152,7 +152,7 @@ For employee portal access (payment verification):
 
 ---
 
-## 🛠️ Technologies & Methods
+## Technologies & Methods
 
 ### **Frontend**
 | Technology | Version | Purpose |
@@ -213,7 +213,7 @@ For employee portal access (payment verification):
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 INSY7314-Task-2/
@@ -284,7 +284,7 @@ INSY7314-Task-2/
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### **Authentication Routes** (`/api/auth`)
 | Method | Endpoint | Description | Auth Required |
@@ -318,7 +318,7 @@ INSY7314-Task-2/
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 ### **Data Protection**
 - **Encryption at Rest:** AES-256 encryption for sensitive data
@@ -349,7 +349,7 @@ INSY7314-Task-2/
 
 ---
 
-## 📺 Demo Video
+## Demo Video
 
 Watch the full walkthrough: 
 
