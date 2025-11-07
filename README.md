@@ -41,11 +41,11 @@ Ensure you have the following installed:
 - **npm** (comes with Node.js)
 - **MongoDB Atlas** account ([Sign up](https://www.mongodb.com/cloud/atlas))
 - **Git**
-- **Visual Studio Code** (recommended)
+- **Visual Studio Code**
 
 ### **Step 1: Clone the Repository**
 ```bash
-git clone SIT IN GITHUB LINK
+git clone SIT IN GITHUB LINK: https://github.com/nyanem/INSY7314-Task-2.git
 cd INSY7314-Task-2
 ```
 
