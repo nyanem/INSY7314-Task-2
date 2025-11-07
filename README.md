@@ -1,128 +1,356 @@
 # INSY7314 Task 2 – International Payments Portal 
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nyanem/INSY7314-Task-2/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nyanem/INSY7314-Task-2/tree/main) 
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nyanem_INSY7314-Task-2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nyanem_INSY7314-Task-2)
-
-This repository contains the **International Banking System** — a full-stack web application built using **React (frontend)**, **Node.js/Express (backend)**, and **MongoDB Atlas (cloud database)**.  
-
-The project implements onboarding and authentication functionalities, ensuring data security and modern web development best practices.
+This repository contains the **International Banking System** — a secure, full-stack web application for international payment processing. Built using **React (frontend)**, **Node.js/Express (backend)**, and **MongoDB Atlas (cloud database)**, the system implements robust authentication, payment processing, and employee verification functionalities with enterprise-grade security measures.
 
 ---
 
-##  Project Structure
+## 🚀 How to Run the Website
 
-<pre>
+### **Prerequisites**
+
+Ensure you have the following installed:
+- **Node.js** v18+ ([Download](https://nodejs.org/))
+- **npm** (comes with Node.js)
+- **MongoDB Atlas** account ([Sign up](https://www.mongodb.com/cloud/atlas))
+- **Git**
+- **Visual Studio Code** (recommended)
+
+### **Step 1: Clone the Repository**
+```bash
+git clone https://github.com/nyanem/INSY7314-Task-2.git
+cd INSY7314-Task-2
+```
+
+### **Step 2: Backend Setup**
+
+#### Navigate to backend directory:
+```bash
+cd backend
+```
+
+#### Install dependencies:
+```bash
+npm install
+```
+
+#### Create `.env` file:
+Create a `.env` file in the `backend` folder with:
+```env
+PORT=5000
+ATLAS_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_jwt_secret_key
+FRONTEND_ORIGIN=https://localhost:3000
+SEED_EMPLOYEES=true
+```
+
+#### Generate HTTPS certificates:
+The project requires SSL certificates for HTTPS. Place them in `backend/keys/`:
+- `privatekey.pem`
+- `certificate.pem`
+
+#### Start the backend server:
+```bash
+npm start
+```
+
+✅ **Success output:**
+```
+MongoDB connected
+Employee seeding completed.
+Secure server running on https://localhost:5000
+```
+
+### **Step 3: Frontend Setup**
+
+#### Navigate to frontend directory (in a new terminal):
+```bash
+cd frontend
+```
+
+#### Install dependencies:
+```bash
+npm install
+```
+
+#### Start the frontend:
+```bash
+npm start
+```
+
+✅ **Success:** Browser opens at `https://localhost:3000`
+
+---
+
+## 🔐 Login Details
+
+### **Customer Account**
+To test the customer portal, register a new account through the registration page:
+- Navigate to `https://localhost:3000/register`
+- Fill in your details (full name, ID number, account number, password)
+- After registration, login with your credentials
+
+### **Employee Account** (Pre-seeded)
+For employee portal access (payment verification):
+
+| Field    | Value                           |
+|----------|---------------------------------|
+| Email    | `samantha.jones@paysmart.com`   |
+| Password | `SamanthaJones!23`              |
+
+**Note:** Employee accounts are automatically seeded when `SEED_EMPLOYEES=true` in your `.env` file.
+
+---
+
+## ✨ Main Features
+
+### **1. Customer Portal**
+- **User Registration & Authentication**
+  - Secure account creation with encrypted data storage
+  - Argon2 password hashing
+  - JWT-based authentication with HTTP-only cookies
+  
+- **Dashboard**
+  - View account balance and debit card details
+  - Recent payment history (last 3 transactions)
+  - Quick access to payment features
+
+- **International Payment Processing**
+  - Multi-step payment form with validation
+  - Support for VISA and Mastercard
+  - Multiple currency support (ZAR, USD, EUR, GBP, JPY)
+  - SWIFT code verification
+  - Real-time payment preview and confirmation
+  - Session timeout protection (5 minutes)
+
+- **Payment History & Tracking**
+  - View all past transactions
+  - Payment status tracking (Pending, Accepted, Rejected)
+  - Detailed payment information with masked sensitive data
+
+### **2. Employee Portal**
+- **Secure Employee Authentication**
+  - Role-based access control
+  - Separate authentication system from customers
+  
+- **Payment Verification Dashboard**
+  - View pending payments requiring verification
+  - Approve or reject customer payments
+  - Track processed payments history
+  - Real-time payment status updates
+
+### **3. Security Features**
+- HTTPS/TLS 1.3 encryption
+- Helmet.js security headers
+- CORS protection
+- Rate limiting (DDoS prevention)
+- MongoDB injection prevention
+- XSS attack protection
+- HTTP Parameter Pollution (HPP) prevention
+- Data encryption at rest
+- Secure cookie handling
+- Input validation and sanitization
+
+---
+
+## 🛠️ Technologies & Methods
+
+### **Frontend**
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React | 19.1.1 | UI framework |
+| React Router | 6.30.1 | Client-side routing |
+| Axios | 1.12.2 | HTTP client for API requests |
+| Stripe.js | 8.1.0 | Payment processing integration |
+| React Testing Library | 16.3.0 | Component testing |
+| Jest | 30.0.0 | JavaScript testing framework |
+
+### **Backend**
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Node.js | - | Runtime environment |
+| Express | 4.18.2 | Web framework |
+| MongoDB Atlas | - | Cloud database |
+| Mongoose | 8.19.0 | MongoDB ODM |
+| Argon2 | 0.44.0 | Password hashing |
+| bcrypt | 6.0.0 | Secondary encryption |
+| JWT | 9.0.2 | Token-based authentication |
+| Helmet | 8.1.0 | Security headers |
+| Express Rate Limit | 8.1.0 | DDoS protection |
+| Zod | 4.1.12 | Schema validation |
+| Stripe | 19.1.0 | Payment gateway |
+| UUID | 13.0.0 | Unique ID generation |
+| Morgan | 1.10.1 | HTTP request logger |
+
+### **Security Middleware**
+- `express-mongo-sanitize` - NoSQL injection prevention
+- `xss-clean` - XSS attack prevention
+- `hpp` - HTTP Parameter Pollution prevention
+- `cookie-parser` - Secure cookie handling
+- `cors` - Cross-Origin Resource Sharing control
+
+### **Development Tools**
+- **Nodemon** - Auto-restart server during development
+- **ESLint** - Code quality and consistency
+- **CircleCI** - Continuous integration
+- **SonarCloud** - Code quality analysis
+
+### **Programming Languages**
+- **JavaScript (ES6+)** - Full-stack development
+- **JSX** - React component markup
+- **CSS3** - Styling and animations
+
+### **Key Methods & Patterns**
+- **RESTful API** architecture
+- **MVC** (Model-View-Controller) pattern
+- **JWT Authentication** with refresh tokens
+- **Encryption at rest** (AES-256)
+- **TLS 1.3** for data in transit
+- **Middleware** pattern for request processing
+- **Schema validation** (Zod, Express Validator)
+- **Error handling** with custom middleware
+- **Component-based** UI architecture
+- **State management** with React hooks
+
+---
+
+## 📁 Project Structure
+
+```
 INSY7314-Task-2/
 │
 ├── backend/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   ├── keys/
+│   ├── controllers/         # Business logic handlers
+│   │   ├── authController.mjs
+│   │   ├── employeeController.mjs
+│   │   ├── onboardingController.mjs
+│   │   └── paymentController.mjs
+│   ├── middleware/          # Express middleware
+│   │   ├── employeeAuth.mjs
+│   │   └── secure.mjs
+│   ├── models/              # MongoDB schemas
+│   │   ├── Customer.mjs
+│   │   ├── Employee.mjs
+│   │   └── Payment.mjs
+│   ├── routes/              # API route definitions
+│   │   ├── authRoutes.mjs
+│   │   ├── employeeRoutes.mjs
+│   │   ├── onboardingRoutes.mjs
+│   │   └── paymentRoutes.mjs
+│   ├── utils/               # Helper functions
+│   │   ├── encryption.mjs
+│   │   ├── maskPan.mjs
+│   │   ├── sanitize.mjs
+│   │   └── seedEmployees.mjs
+│   ├── validation/          # Input validation schemas
+│   │   └── paymentSchema.mjs
+│   ├── keys/                # SSL certificates
 │   │   ├── certificate.pem
 │   │   └── privatekey.pem
-│   ├── server.mjs
+│   ├── server.mjs           # Express server entry point
 │   ├── package.json
-│   └── .env (⚠️ not included in repo)
+│   └── .env                 # ⚠️ Not in repo
 │
 ├── frontend/
-│   ├── src/
 │   ├── public/
-│   ├── package.json
-│   └── .env (optional)
+│   │   ├── index.html
+│   │   ├── manifest.json
+│   │   └── robots.txt
+│   ├── src/
+│   │   ├── components/      # React components
+│   │   │   ├── AboutUs.js
+│   │   │   ├── Dashboard.js
+│   │   │   ├── Index.js
+│   │   │   ├── Login.js
+│   │   │   ├── Navbar.js
+│   │   │   ├── PaymentForm.js
+│   │   │   ├── PaymentHistory.js
+│   │   │   ├── Register.js
+│   │   │   ├── timer.js
+│   │   │   └── TrackPayments.js
+│   │   ├── assets/          # Images and static files
+│   │   ├── data/
+│   │   │   └── payment.js
+│   │   ├── utils/
+│   │   │   └── validators.js
+│   │   ├── App.js
+│   │   ├── App.css
+│   │   ├── index.js
+│   │   └── index.css
+│   └── package.json
 │
+├── package.json
 └── README.md
-</pre>
-
-
----
-
-##  Getting Started
-
-### **1. Prerequisites**
-
-Make sure the following are installed on your system:
-- [Node.js](https://nodejs.org/en/) (v18+ recommended)
-- npm (comes with Node)
-- A [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account (for cloud database access)
-- Git
-- Visual Studio Code (recommended IDE)
+```
 
 ---
 
-##  Backend Setup
+## 🔌 API Endpoints
 
-### **Step 1: Navigate to the backend directory**
-cd backend
+### **Authentication Routes** (`/api/auth`)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/register` | Register new customer | No |
+| POST | `/login` | Customer login | No |
+| POST | `/login/employee` | Employee login | No |
+| GET | `/me` | Get current user info | Yes (Customer) |
 
-### **Step 2: Install Dependencies**
-npm install
+### **Payment Routes** (`/api/payments`)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/createPayment` | Create new payment | Yes (Customer) |
+| GET | `/` | Get all payments | Yes (Customer) |
+| GET | `/myPayments` | Get user's payments | Yes (Customer) |
+| GET | `/:id` | Get payment by ID | Yes (Customer) |
 
-### **Step 3: Create .env file**
-Important: The .env file is not pushed to GitHub for security reasons.
-You need to create your own .env file in the backend folder with the following content:
-PORT=5000
-ATLAS_URI=<your MongoDB Atlas connection string>
-JWT_SECRET=<your secret key> 
+### **Employee Routes** (`/api/employees`)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/pendingPayments` | Get payments awaiting verification | Yes (Employee) |
+| POST | `/verifyPayment` | Approve/reject payment | Yes (Employee) |
+| GET | `/processedPayments` | Get verified payments | Yes (Employee) |
 
-### **Step 4: HTTPS Keys**
-This project uses self-signed SSL certificates for secure local connections.
-backend/keys/privatekey.pem
-backen/keys/certificate.pem
-
-### **Step 5: Run the backend**
-npm start
-
-If successful you should see: 
-[dotenv] injecting env
-MongoDB connected
-Server running on https://localhost:5000
-
----
-
-## Frontend Setup
-
-### **Step 1: Navigate to the frontend directory**
-cd ../frontend
-
-### **Step 2: Install dependencies**
-npm install
-
-### **Step 3: Start the frontend**
-npm start
-If successful you should see: 
-https://localhost:3000
+### **Onboarding Routes** (`/api/onboarding`)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/start` | Get started page | No |
+| GET | `/features` | View features | No |
+| GET | `/contact` | Contact information | No |
 
 ---
 
-##  Connecting Frontend and Backend
+## 🔒 Security Features
 
-The frontend communicates with the backend API through the following endpoints:
+### **Data Protection**
+- **Encryption at Rest:** AES-256 encryption for sensitive data
+- **Encryption in Transit:** TLS 1.3 HTTPS only
+- **Password Hashing:** Argon2 algorithm (memory-hard)
+- **Data Masking:** PAN masking for card numbers and SWIFT codes
 
-| Route                | Method   | Description             |
-| -------------------- | -------- | ----------------------- |
-| `/api/auth/register` | POST     | Register a new user     |
-| `/api/auth/login`    | POST     | Authenticate user login |
-| `/api/onboarding`    | GET/POST | Onboarding process      |
+### **Authentication & Authorization**
+- JWT tokens with HTTP-only cookies
+- Role-based access control (Customer/Employee)
+- Session management with automatic timeout
+- Secure token generation and validation
 
-##  Database 
-The application uses MongoDB Atlas as its cloud database.
-Collections include:
-Customers – for client registration and onboarding process
-Payments – for authentication data
+### **Attack Prevention**
+- **Rate Limiting:** 50 requests/15min for auth, 200 requests/15min for API
+- **XSS Protection:** Input sanitization and content security policy
+- **CSRF Protection:** SameSite cookies and origin validation
+- **NoSQL Injection:** MongoDB query sanitization
+- **DDoS Protection:** Express rate limiting
+- **HPP Protection:** Parameter pollution prevention
 
-## Youtube Video
+### **HTTP Security Headers**
+- Content Security Policy (CSP)
+- X-Frame-Options: DENY
+- Strict-Transport-Security (HSTS)
+- X-Content-Type-Options: nosniff
+- Referrer-Policy
 
-https://www.youtube.com/watch?v=amEYyRhcyNA 
+---
 
-## Authors
-- Team: PaySmart Group
-- Module: INSY7314
-- Institution: Varsity College, Cape Town
-- Database: MongoDB Atlas
-- Frontend: React.js
-- Backend: Node.js (Express)
-- Version Control: GitHub + CircleCI
-  
-This readme file was AI generated. 
+## 📺 Demo Video
+
+Watch the full walkthrough: 
+
+---
